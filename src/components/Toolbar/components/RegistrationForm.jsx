@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import axios from "axios";
 
-const RegistrationForm = () => {
+const RegistrationForm = (props) => {
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
+    const [error, setError] = useState(null);
 
     const handleLoginChange = (event) => {
         setLogin(event.target.value);
@@ -19,12 +21,24 @@ const RegistrationForm = () => {
 
     const handleFormSubmit = (event) => {
         event.preventDefault();
-        // handle form submit logic
+        event.preventDefault();
+        axios.post("http://localhost:8080/api/auth/register", {
+            'login': login,
+            'email':email,
+            'password': password,
+        }).then((resp) => {
+            props.onReg();
+        }
+        ).catch(error => {
+            console.error(error);
+            setError(error.response.data.message);
+        });
     };
 
 
     return (
         <div className="flex flex-col justify-center items-center">
+            {error && <div className={"text-red-600"}>{error}</div>}
             <h2 className="mb-6 font-bold">Регистрация</h2>
             <form onSubmit={handleFormSubmit} className="mb-4">
                 <div className="mb-4 space-x-8 flex">

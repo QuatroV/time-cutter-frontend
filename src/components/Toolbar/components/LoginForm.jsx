@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
-const LoginForm = () => {
+const LoginForm = (props) => {
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState(null);
 
     const handleLoginChange = (event) => {
         setLogin(event.target.value);
@@ -12,13 +14,26 @@ const LoginForm = () => {
         setPassword(event.target.value);
     };
 
+
     const handleFormSubmit = (event) => {
         event.preventDefault();
-        // handle form submit logic
+        axios.post("http://localhost:8080/api/auth/login", {
+            'login': login,
+            'password': password
+        }).then((resp) => {
+                localStorage.setItem("tokens", resp.data);
+                localStorage.setItem("login", login);
+                props.onClose();
+            }
+        ).catch(error => {
+            console.error(error);
+            setError(error.response.data.message);
+        });
     };
 
     return (
             <div className="flex flex-col justify-center items-center">
+                {error && <div className={"text-red-600"}>{error}</div>}
                 <h2 className="mb-6 font-bold">Авторизация</h2>
                 <form onSubmit={handleFormSubmit} className="mb-4">
                     <div className="mb-4 space-x-6 flex">

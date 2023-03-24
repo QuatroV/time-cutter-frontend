@@ -21,7 +21,8 @@ const LoginButton = (props) => {
     };
 
     function handleLogout() {
-        // Your code to handle logout goes here
+        localStorage.removeItem("login");
+        localStorage.removeItem("tokens");
         setIsAuthorized(false);
         props.onData(null);
     }
