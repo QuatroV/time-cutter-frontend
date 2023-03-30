@@ -7,18 +7,19 @@ import RightSidebar from "./components/RightSidebar";
 import Toolbar from "./components/Toolbar"
 
 import "./index.css"
+import LoginContextProvider from "./components/Toolbar/components/LoginContext";
 
 function App() {
     const [userData,setUserData]= useState({
-        login: localStorage.getItem("login"),
-        tokens: localStorage.getItem("tokens")
+        login: sessionStorage.getItem("login"),
+        tokens: sessionStorage.getItem("tokens")
     });
 
     useEffect(() => {
         const handleStorageChange = () => {
             setUserData({
-                login: localStorage.getItem("login"),
-                tokens: localStorage.getItem("tokens")
+                login: sessionStorage.getItem("login"),
+                tokens: sessionStorage.getItem("tokens")
             });
         };
 
@@ -32,18 +33,20 @@ function App() {
 
 
   return (
-    <div className="App bg-gray-200 w-screen h-screen flex flex-col">
-      <div className="w-100 flex flex-col border-b border-gray-600">
-        <Menubar user={userData}/>
-        <Toolbar user={userData}/>
-      </div>
-      <div className="w-100 flex flex-1">
-        <LeftSidebar /> 
-        <Graph />
-        <RightSidebar />
-      </div>
-    <Footer />  
-    </div>
+      <LoginContextProvider>
+        <div className="App bg-gray-200 w-screen h-screen flex flex-col">
+          <div className="w-100 flex flex-col border-b border-gray-600">
+            <Menubar user={userData}/>
+            <Toolbar user={userData}/>
+          </div>
+          <div className="w-100 flex flex-1">
+            <LeftSidebar />
+            <Graph />
+            <RightSidebar />
+          </div>
+        <Footer />
+        </div>
+      </LoginContextProvider>
   );
 }
 

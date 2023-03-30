@@ -1,28 +1,32 @@
-import React, { useState } from 'react';
+import React, {useContext, useState} from 'react';
 import axios from 'axios';
+import {LoginContext} from "./LoginContext";
 
 const LoginForm = (props) => {
-    const [login, setLogin] = useState('');
-    const [password, setPassword] = useState('');
+    const [loginForm, setLoginForm] = useState('');
+    const [passwordForm, setPasswordForm] = useState('');
     const [error, setError] = useState(null);
+    
+    const {updateLogin} = useContext(LoginContext);
 
     const handleLoginChange = (event) => {
-        setLogin(event.target.value);
+        setLoginForm(event.target.value);
     };
 
     const handlePasswordChange = (event) => {
-        setPassword(event.target.value);
+        setPasswordForm(event.target.value);
     };
 
 
     const handleFormSubmit = (event) => {
         event.preventDefault();
         axios.post("http://localhost:8080/api/auth/login", {
-            'login': login,
-            'password': password
+            'login': loginForm,
+            'password': passwordForm
         }).then((resp) => {
-                localStorage.setItem("tokens", resp.data);
-                localStorage.setItem("login", login);
+                sessionStorage.setItem("tokens", resp.data);
+                sessionStorage.setItem("login", loginForm);
+                updateLogin(loginForm);
                 props.onClose();
             }
         ).catch(error => {
@@ -36,13 +40,13 @@ const LoginForm = (props) => {
                 {error && <div className={"text-red-600"}>{error}</div>}
                 <h2 className="mb-6 font-bold">Авторизация</h2>
                 <form onSubmit={handleFormSubmit} className="mb-4">
-                    <div className="mb-4 space-x-6 flex">
+                    <div className="mb-4 flex justify-between w-full gap-3">
                         <label htmlFor="login">Логин</label>
-                        <input type="login" id="login" value={login} onChange={handleLoginChange} required className="rounded-md border border-black px-2"/>
+                        <input type="login" id="login" value={loginForm} onChange={handleLoginChange} required className="rounded-md border border-black px-2 w-44"/>
                     </div>
-                    <div className="mb-4 space-x-4 flex">
+                    <div className="mb-4 flex justify-between w-full gap-3">
                         <label htmlFor="password">Пароль</label>
-                        <input type="password" id="password" className="rounded-md border border-black px-2" value={password} onChange={handlePasswordChange} required />
+                        <input type="password" id="password" className="rounded-md border border-black px-2 w-44" value={passwordForm} onChange={handlePasswordChange} required />
                     </div>
                     <div className="justify-center items-center content-center flex">
                         <button type="submit" className="cursor-pointer hover:bg-gray-300 rounded-lg active:shadow-inner">Войти</button>
