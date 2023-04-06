@@ -1,5 +1,7 @@
+import DiagramProperties from "./DiagramProperties";
+
 const SignalProperties = () => {
-    return <div className="text-sm">Тут будут различные свойства</div>
+    return <DiagramProperties/>
 }
 
 export default SignalProperties

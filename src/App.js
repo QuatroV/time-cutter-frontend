@@ -8,6 +8,7 @@ import Toolbar from "./components/Toolbar"
 
 import "./index.css"
 import LoginContextProvider from "./components/Toolbar/components/LoginContext";
+import DiagramContextProvider from "./components/DiagramProperties/DiagramContext";
 
 function App() {
     const [userData,setUserData]= useState({
@@ -34,18 +35,20 @@ function App() {
 
   return (
       <LoginContextProvider>
-        <div className="App bg-gray-200 w-screen h-screen flex flex-col">
-          <div className="w-100 flex flex-col border-b border-gray-600">
-            <Menubar user={userData}/>
-            <Toolbar user={userData}/>
-          </div>
-          <div className="w-100 flex flex-1">
-            <LeftSidebar />
-            <Graph />
-            <RightSidebar />
-          </div>
-        <Footer />
-        </div>
+          <DiagramContextProvider>
+            <div className="App bg-gray-200 w-screen h-screen flex flex-col">
+              <div className="w-100 flex flex-col border-b border-gray-600">
+                <Menubar user={userData}/>
+                <Toolbar user={userData}/>
+              </div>
+              <div className="w-100 flex flex-1">
+                <LeftSidebar />
+                <Graph />
+                <RightSidebar />
+              </div>
+            <Footer />
+            </div>
+          </DiagramContextProvider>
       </LoginContextProvider>
   );
 }
