@@ -8,6 +8,7 @@ const defaultDiagram = {
     name: 'Кефтеме',
     totalTime: 60,
     stepTime: 1,
+    unit: 'ue',
     showGrid: true,
     showAxes: true,
     signals: []
