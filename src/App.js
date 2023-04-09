@@ -41,7 +41,7 @@ function App() {
                 <Menubar user={userData}/>
                 <Toolbar user={userData}/>
               </div>
-              <div className="w-100 flex flex-1">
+              <div className="w-100 flex flex-1 h-3/5">
                 <LeftSidebar />
                 <Graph />
                 <RightSidebar />
