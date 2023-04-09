@@ -6,7 +6,7 @@ const Signals = () => {
     const {diagram, removeSignal, updateSignal} = useContext(DiagramContext);
 
 
-    return <div className="flex flex-col overflow-auto" style={{height: '95%'}}>
+    return <div className="flex flex-col overflow-auto">
         {diagram.signals.map((item, index) =>
             <Signal signal={item} index={index}/>
         )}

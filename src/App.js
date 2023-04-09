@@ -9,6 +9,7 @@ import Toolbar from "./components/Toolbar"
 import "./index.css"
 import LoginContextProvider from "./components/Toolbar/components/LoginContext";
 import DiagramContextProvider from "./components/DiagramProperties/DiagramContext";
+import CurrentItemContextProvider from "./components/DiagramProperties/CurrentItemContext";
 
 function App() {
     const [userData,setUserData]= useState({
@@ -42,9 +43,11 @@ function App() {
                 <Toolbar user={userData}/>
               </div>
               <div className="w-100 flex flex-1 h-3/5">
-                <LeftSidebar />
-                <Graph />
-                <RightSidebar />
+                  <CurrentItemContextProvider>
+                      <LeftSidebar />
+                      <Graph />
+                      <RightSidebar />
+                  </CurrentItemContextProvider>
               </div>
             <Footer />
             </div>

@@ -12,7 +12,7 @@ const ManageSignals = () => {
         })
     }
 
-    return <div className="bg-gray-300 border-b border-gray-800 p-2 flex flex-col" style={{height: '5%'}}>
+    return <div className="bg-gray-300 border-b border-gray-800 p-2 flex flex-col sticky top-0 z-10">
         <button onClick={createSignal} className={"text-center cursor-pointer hover:underline decoration-dotted underline-offset-2"}>Добавить</button>
     </div>
 }
