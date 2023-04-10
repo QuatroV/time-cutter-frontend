@@ -7,7 +7,7 @@ const ManageSignals = () => {
     const createSignal = () => {
         addSignal({
             name: 'Сигнал ' + (diagram.signals.length + 1),
-            type: 'signal',
+            type: 'bit',
             areas : []
         })
     }
