@@ -8,6 +8,9 @@ const Menubar = () => {
 
     return (
         <div className="flex justify-center">
+            <div className="absolute left-2">
+                <img src={"ico.png"} alt="Logo" width={40} height={40}/>
+            </div>
             <div className="w-100 font-bold py-1">
                 <h1 className="text-2xl">{diagram.name}</h1>
             </div>

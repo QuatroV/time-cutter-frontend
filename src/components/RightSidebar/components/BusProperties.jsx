@@ -57,7 +57,7 @@ const BusProperties = () => {
                 <label>Значения</label>
                 <textarea value={signal.areas.join(',')}
                           placeholder={"Перечислите значения через запятую..."}
-                          className="rounded-md border border-black px-2 w-50 h-20"
+                          className="rounded-md border border-black px-2 w-44 h-20"
                           onChange={handleValuesChange}
                 />
             </div>

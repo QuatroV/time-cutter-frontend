@@ -133,14 +133,14 @@ const DiagramProperties = () => {
             <div className={"flex flex-col justify-center gap-2 pl-5"}>
                 <div className={"flex space-x-5"}>
                     <input type={"checkbox"}
-                           value={showGrid}
+                           checked={showGrid}
                            onChange={handleShowGrid}
                     />
                     <label>Отображение сетки</label>
                 </div>
                 <div className={"flex space-x-5"}>
                     <input type={"checkbox"}
-                           value={showAxes}
+                           checked={showAxes}
                            onChange={handleShowAxes}
                     />
                     <label>Отображение осей</label>
