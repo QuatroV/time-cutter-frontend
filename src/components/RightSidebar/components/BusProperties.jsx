@@ -1,12 +1,18 @@
 import React, {useContext, useEffect, useState} from "react";
 import {CurrentItemContext} from "../../DiagramProperties/CurrentItemContext";
 import {DiagramContext} from "../../DiagramProperties/DiagramContext";
+import BusArea from "./BusArea";
 
 
 const BusProperties = () => {
     const {diagram,updateSignal} = useContext(DiagramContext);
     const {currentItem} = useContext(CurrentItemContext);
     const [signal, setSignal] = useState(diagram.signals[currentItem.index]);
+
+    const defaultArea = {
+      value : '',
+      steps : 1
+    };
 
     useEffect(() => {
         setSignal(diagram.signals[currentItem.index]);
@@ -20,14 +26,6 @@ const BusProperties = () => {
     }
 
 
-    function handleKeyPress(event) {
-        const allowedChars = ['0', '1', '~', '/','Delete','Backspace', 'ArrowLeft', 'ArrowRight'];
-        const pressedKey = event.key;
-        if (!allowedChars.includes(pressedKey)) {
-            event.preventDefault();
-        }
-    }
-
     function handleDepthKeyDown(e) {
         // Prevent manual input
         e.preventDefault();
@@ -40,31 +38,39 @@ const BusProperties = () => {
         })
     }
 
+    const handleAddValue = (event) => {
+        const newAreas = [...signal.areas, defaultArea];
+        setSignal((prevSignal) => ({...prevSignal, areas: newAreas}));
+        updateSignal(currentItem.index, {
+            areas: newAreas
+        })
+    }
+
     return (
-        <div className={"flex flex-col justify-center items-center"}>
-            <div className={"flex flex-col justify-center items-center gap-2"}>
-                <label>Разрядность</label>
-                <input type={"number"}
-                       min={2}
-                       max={8}
-                       onChange={handleDepthChange}
-                       onKeyDown={handleDepthKeyDown}
-                       value={signal.depth}
-                       className="rounded-md border border-black px-2 w-14 text-center"
-                       pattern="[0123456789]+"/>
+        <div>
+            <div className={"flex flex-col justify-center items-center pb-4"}>
+                <div className={"flex flex-col justify-center items-center gap-2"}>
+                    <label>Разрядность</label>
+                    <input type={"number"}
+                           min={2}
+                           max={8}
+                           onChange={handleDepthChange}
+                           onKeyDown={handleDepthKeyDown}
+                           value={signal.depth}
+                           className="rounded-md border border-black px-2 w-14 text-center"
+                           pattern="[0123456789]+"/>
+                </div>
             </div>
-            <div className={"flex flex-col justify-center items-center gap-2"}>
-                <label>Значения</label>
-                <textarea value={signal.areas.join(',')}
-                          placeholder={"Перечислите значения через запятую..."}
-                          className="rounded-md border border-black px-2 w-44 h-20"
-                          onChange={handleValuesChange}
-                />
+            <div className={"text-center"}>
+                <label className={""}>Значения</label>
+                <div className="flex flex-col overflow-auto">
+                    {diagram.signals[currentItem.index].areas.map((item, index) =>
+                        <BusArea area={item} index={index} signal={diagram.signals[currentItem.index]}/>
+                    )}
+                    <button className={"rounded-md border border-black mt-2"} onClick={handleAddValue}>Добавить</button>
+                </div>
             </div>
-
         </div>
-
-
     );
 }
 

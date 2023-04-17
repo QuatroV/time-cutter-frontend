@@ -37,20 +37,20 @@ function App() {
   return (
       <LoginContextProvider>
           <DiagramContextProvider>
-            <div className="App bg-gray-200 w-screen h-screen flex flex-col">
-              <div className="w-100 flex flex-col border-b border-gray-600">
-                <Menubar user={userData}/>
-                <Toolbar user={userData}/>
-              </div>
-              <div className="w-100 flex flex-1 h-3/5">
-                  <CurrentItemContextProvider>
+              <CurrentItemContextProvider>
+                <div className="App bg-gray-200 w-screen h-screen flex flex-col">
+                  <div className="w-100 flex flex-col border-b border-gray-600">
+                    <Menubar user={userData}/>
+                    <Toolbar user={userData}/>
+                  </div>
+                  <div className="w-100 flex flex-1 h-3/5">
                       <LeftSidebar />
                       <Graph />
                       <RightSidebar />
-                  </CurrentItemContextProvider>
-              </div>
-            <Footer />
-            </div>
+                  </div>
+                <Footer />
+                </div>
+              </CurrentItemContextProvider>
           </DiagramContextProvider>
       </LoginContextProvider>
   );

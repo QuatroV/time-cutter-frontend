@@ -4,16 +4,9 @@ import DiagramRenderer from "./components/DiagramRenderer";
 import {DiagramContext} from "../DiagramProperties/DiagramContext";
 
 const Graph = () => {
-    const {updateCurrentItem} = useContext(CurrentItemContext);
     const {diagram} = useContext(DiagramContext);
 
-    const handleWindowClick = () => {
-        updateCurrentItem({
-            type: 'diagram'
-        });
-    };
-
-    return <main onClick={handleWindowClick} className="flex-1 bg-white ">
+    return <main className="flex-1 bg-white ">
         <DiagramRenderer diagram={diagram}/>
     </main>;
   };

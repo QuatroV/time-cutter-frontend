@@ -1,9 +1,11 @@
-import React, { useRef, useEffect } from 'react';
+import React, {useRef, useEffect, useContext} from 'react';
 import { SVG } from '@svgdotjs/svg.js';
 import { ReactSVG } from 'react-svg';
+import {CurrentItemContext} from "../../DiagramProperties/CurrentItemContext";
 
 const DiagramRenderer = ({ diagram }) => {
     const containerRef = useRef();
+    const {currentItem, updateCurrentItem} = useContext(CurrentItemContext);
 
     useEffect(() => {
         if (containerRef.current) {
@@ -14,7 +16,7 @@ const DiagramRenderer = ({ diagram }) => {
             // Устанавливаем ширину контейнера на основе текущей ширины
             container.style.width = `${containerWidth}px`;
             clearContainer(containerRef.current)
-            drawDiagram(containerRef.current, diagram);
+            drawDiagram(containerRef.current, diagram, updateCurrentItem);
         }
     }, [containerRef, diagram]);
 
@@ -48,15 +50,16 @@ const findLongestSignalName = (signals) => {
     return maxLength;
 };
 
-const drawDiagram = (container, diagram) => {
+const drawDiagram = (container, diagram, updateCurrentItem) => {
+
     const { totalTime, stepTime, unit, showGrid, showAxes, signals } = diagram;
 
     //Установка значений
-    const startPaddingX = findLongestSignalName(signals) * 7 + 5;
+    const startPaddingX = findLongestSignalName(signals) * 7 + 20;
     const signalPadding = 15;
     const stepCount = totalTime/stepTime;
     const stepWidth = 50;
-    const signalHeight = 50;
+    const signalHeight = 25;
     const diagramWidth = stepWidth*stepCount + startPaddingX;
     const diagramHeight = signals.length * (signalHeight + signalPadding + 1);
 
@@ -105,39 +108,116 @@ const drawDiagram = (container, diagram) => {
         const { name, type, areas } = signal;
         //Начальная координата по y = номер сигнала * размер сигнала + отступ
         const y = index * signalHeight+(signalPadding*(index+1));
-
-        areas.forEach((value, areaIndex) => {
-            const startX = xWithPadding(areaIndex * stepWidth);
-            const endX = xWithPadding((areaIndex + 1) * stepWidth);
-
-            if (type === 'bit' || type === 'clk') {
-                if (value === '1') {
-                    svg.line(startX, y, endX, y).stroke({ color: 'blue', width: 2 });
-                } else if(value === '0') {
-                    svg.line(startX, y + signalHeight, endX, y + signalHeight).stroke({ color: 'blue', width: 2 });
-                }
-
-                if (areaIndex > 0) {
-                    const prevValue = areas[areaIndex - 1];
-                    if (prevValue !== value) {
-                        svg.line(startX, y, startX, y + signalHeight).stroke({ color: 'blue', width: 2 });
+        switch (type) {
+            case 'bit':
+            {
+                areas.forEach((value, areaIndex) => {
+                    const startX = xWithPadding(areaIndex * stepWidth);
+                    const endX = xWithPadding((areaIndex + 1) * stepWidth);
+                    if (areaIndex > 0) {
+                        const prevValue = areas[areaIndex - 1];
+                        if (prevValue !== value) {
+                            if(prevValue < value) {
+                                svg.line(startX, y+signalHeight, startX+8, y).stroke({ color: 'blue', width: 2 });
+                                svg.line(startX+8, y, endX, y).stroke({ color: 'blue', width: 2 });
+                            } else {
+                                svg.line(startX, y, startX+8, y+signalHeight).stroke({ color: 'blue', width: 2 });
+                                svg.line(startX+8, y+signalHeight, endX, y+signalHeight).stroke({ color: 'blue', width: 2 });
+                            }
+                        } else {
+                            if (value === '1') {
+                                svg.line(startX, y, endX, y).stroke({ color: 'blue', width: 2 });
+                            } else if(value === '0') {
+                                svg.line(startX, y + signalHeight, endX, y + signalHeight).stroke({ color: 'blue', width: 2 });
+                            }
+                        }
+                    } else {
+                        if (value === '1') {
+                            svg.line(startX, y, endX, y).stroke({ color: 'blue', width: 2 });
+                        } else if(value === '0') {
+                            svg.line(startX, y + signalHeight, endX, y + signalHeight).stroke({ color: 'blue', width: 2 });
+                        }
                     }
-                }
-            } else if (type === 'bus') {
-                const offsetY = (signalHeight / 2) * value;
-                const lineY = y - offsetY;
-                svg.line(startX, lineY, endX, lineY).stroke({ color: 'blue', width: 2 });
-            } else {
-                console.warn(`Unknown signal type: ${type}`);
+
+            })
+                break;
             }
-        });
+            case 'clk':
+            {
+                areas.forEach((value, areaIndex) => {
+                    const startX = xWithPadding(areaIndex * stepWidth);
+                    const endX = xWithPadding((areaIndex + 1) * stepWidth);
+                    if (value === '1') {
+                        svg.line(startX, y, endX, y).stroke({ color: 'blue', width: 2 });
+                    } else if(value === '0') {
+                        svg.line(startX, y + signalHeight, endX, y + signalHeight).stroke({ color: 'blue', width: 2 });
+                    }
+
+                    if (areaIndex > 0) {
+                        const prevValue = areas[areaIndex - 1];
+                        if (prevValue !== value) {
+                            svg.line(startX, y, startX, y + signalHeight).stroke({ color: 'blue', width: 2 });
+                        }
+                    }
+                })
+                break;
+            }
+            case 'bus':
+            {
+                let currentStep = 0;
+                areas.forEach((area, areaIndex) => {
+                    const startX = xWithPadding(currentStep * stepWidth);
+                    const endX = xWithPadding(currentStep*stepWidth + area.steps*stepWidth);
+                    if (areaIndex > 0) {
+                        svg.line(startX,y, startX + 8, y + signalHeight).stroke({ color: 'blue', width: 2 });
+                        svg.line(startX,y+signalHeight, startX + 8, y).stroke({ color: 'blue', width: 2 });
+                        svg.line(startX+8, y, endX, y).stroke({ color: 'blue', width: 2 });
+                        svg.line(startX+8, y+signalHeight, endX, y+signalHeight).stroke({ color: 'blue', width: 2 });
+                    } else {
+                        svg.line(startX, y, endX, y).stroke({ color: 'blue', width: 2 });
+                        svg.line(startX, y+signalHeight, endX, y+signalHeight).stroke({ color: 'blue', width: 2 });
+                    }
+                    svg.text(area.value)
+                        .font({ family: 'Arial', size: 15, anchor: 'middle', weight: "bold"})
+                        .fill("black")
+                        .move((endX+startX)/2, y+signalHeight/2-15)
+                        .attr({ 'text-anchor': 'end', 'dominant-baseline': 'central'});
+                    currentStep+=Number(area.steps);
+                })
+                break;
+            }
+        }
 
         // Добавьте название сигнала слева от сигнала
-        svg
+        const signalNameText = svg
             .text(name)
-            .font({ family: 'Arial', size: 14, anchor: 'end' })
-            .move(0, y+signalHeight/2-14)
-            .attr({ 'text-anchor': 'end', 'dominant-baseline': 'central' });
+            .font({ family: 'Arial', size: 16, anchor: 'start', weight: "bold"})
+            .fill("green")
+            .move(startPaddingX-3, y+signalHeight/2-14)
+            .attr({ 'text-anchor': 'end', 'dominant-baseline': 'central', 'cursor': 'pointer' });
+        const underline = svg
+            .line(startPaddingX-3, y+signalHeight/2+9, startPaddingX - name.length*10, y+signalHeight/2+9)
+            .stroke({ width: 2, dasharray: "2,2", color: "black" });
+        underline.hide();
+
+        // Показываем пунктирное подчеркивание при наведении курсора мыши
+        signalNameText.on("mouseenter", function () {
+            underline.show();
+        });
+
+        // Скрываем пунктирное подчеркивание при выходе курсора мыши
+        signalNameText.on("mouseleave", function () {
+            underline.hide();
+        });
+
+        // Выбираем текщую диаграмму активной
+        signalNameText.on("click", function () {
+            updateCurrentItem({
+                type: 'signal',
+                index: index
+            })
+        });
+
     });
 };
 
