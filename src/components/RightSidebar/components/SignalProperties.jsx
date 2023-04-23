@@ -26,10 +26,18 @@ const SignalProperties = () => {
     }
 
     const handleTypeChange = (event) => {
-        setSignal((prevSignal) => ({...prevSignal, type: event.target.value}));
-        updateSignal(currentItem.index, {
-            type: event.target.value
-        })
+        if(event.target.value === 'bus') {
+            setSignal((prevSignal) => ({...prevSignal, type: event.target.value, areas: []}));
+            updateSignal(currentItem.index, {
+                type: event.target.value,
+                areas: []
+            })
+        } else {
+            setSignal((prevSignal) => ({...prevSignal, type: event.target.value}));
+            updateSignal(currentItem.index, {
+                type: event.target.value
+            })
+        }
     }
 
 

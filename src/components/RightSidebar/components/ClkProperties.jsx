@@ -13,9 +13,28 @@ const ClkProperties = () => {
     }, [currentItem, diagram]);
 
     const handleValuesChange = (event) => {
-        setSignal((prevSignal) => ({...prevSignal, areas: event.target.value.split('')}));
+        const areasBefore = signal.areas;
+        const areasAfter = event.target.value.split('');
+        for(let i = 0; i < areasAfter.length; i++) {
+            if(i >= areasBefore.length) {
+                areasBefore.push({
+                    value: areasAfter[i],
+                    padding: 0
+                })
+            } else {
+                areasBefore[i].value = areasAfter[i];
+            }
+        }
+        if(areasAfter.length < areasBefore.length) {
+            let counter = areasBefore.length - areasAfter.length;
+            while(counter > 0) {
+                areasBefore.pop();
+                counter--;
+            }
+        }
+        setSignal((prevSignal) => ({...prevSignal, areas: areasBefore}));
         updateSignal(currentItem.index, {
-            areas: event.target.value.split('')
+            areas: areasBefore
         })
     }
 
@@ -32,7 +51,7 @@ const ClkProperties = () => {
         <div className={"flex flex-col justify-center items-center gap-2"}>
             <label>Значения сигналов</label>
             <input onChange={handleValuesChange}
-                   value={signal.areas.join('')}
+                   value={signal.areas.map((obj) => obj.value).join('')}
                    className="rounded-md border border-black px-2 w-44 text-center"
                    onKeyDown={handleKeyPress}
                    pattern="[01~/]+"/>

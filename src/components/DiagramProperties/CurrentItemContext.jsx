@@ -19,9 +19,14 @@ const CurrentItemContextProvider = ({ children }) => {
         }));
     };
 
+    const updateCurrentItemFull = (updatedCurrentItem) => {
+        setCurrentItem(updatedCurrentItem);
+    }
+
     const contextValue = {
         currentItem,
-        updateCurrentItem
+        updateCurrentItem,
+        updateCurrentItemFull
     };
 
     // Предоставляем доступ к функции setState() и значению контекста через провайдер

@@ -11,7 +11,8 @@ const defaultDiagram = {
     unit: 'ue',
     showGrid: true,
     showAxes: true,
-    signals: []
+    signals: [],
+    tracers: []
 };
 
 // Создаем провайдер контекста

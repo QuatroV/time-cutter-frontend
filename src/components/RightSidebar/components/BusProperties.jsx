@@ -10,8 +10,9 @@ const BusProperties = () => {
     const [signal, setSignal] = useState(diagram.signals[currentItem.index]);
 
     const defaultArea = {
-      value : '',
-      steps : 1
+        value : '',
+        steps : 1,
+        padding: 0
     };
 
     useEffect(() => {
@@ -48,19 +49,6 @@ const BusProperties = () => {
 
     return (
         <div>
-            <div className={"flex flex-col justify-center items-center pb-4"}>
-                <div className={"flex flex-col justify-center items-center gap-2"}>
-                    <label>Разрядность</label>
-                    <input type={"number"}
-                           min={2}
-                           max={8}
-                           onChange={handleDepthChange}
-                           onKeyDown={handleDepthKeyDown}
-                           value={signal.depth}
-                           className="rounded-md border border-black px-2 w-14 text-center"
-                           pattern="[0123456789]+"/>
-                </div>
-            </div>
             <div className={"text-center"}>
                 <label className={""}>Значения</label>
                 <div className="flex flex-col overflow-auto">

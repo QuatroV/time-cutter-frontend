@@ -1,4 +1,4 @@
-import {useContext, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import { BsTrash3 } from 'react-icons/bs';
 import {IoIosArrowUp, IoIosArrowDown} from 'react-icons/io'
 import {DiagramContext} from "../../DiagramProperties/DiagramContext";
@@ -8,6 +8,10 @@ const BusArea = ({area, index, signal, signalIndex}) => {
     const {diagram, updateSignal} = useContext(DiagramContext);
     const [currentArea, setCurrentArea] = useState(area);
     const {currentItem} = useContext(CurrentItemContext);
+
+    useEffect(() => {
+        setCurrentArea(signal.areas[index]);
+    }, [currentItem, diagram, signal, area]);
 
     function handleKeyDown(event) {
         const allowedKeys = [
