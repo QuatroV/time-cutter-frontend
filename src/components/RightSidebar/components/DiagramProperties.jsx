@@ -1,4 +1,4 @@
-import React, {useContext, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {DiagramContext} from "../../DiagramProperties/DiagramContext";
 import BusArea from "./BusArea";
 import Tracer from "./Tracer";
@@ -12,6 +12,19 @@ const DiagramProperties = () => {
     const [showGrid, setShowGrid] = useState(diagram.showGrid);
     const [showAxes, setShowAxes] = useState(diagram.showAxes);
     const [tracers, setTracers] = useState(diagram.tracers);
+
+    useEffect(() => {
+        setDiagramName(diagram.name);
+        setTotalTime(diagram.totalTime);
+        setUnit(diagram.unit);
+        setStepTime(diagram.stepTime);
+        setShowGrid(diagram.showGrid);
+        setShowAxes(diagram.showAxes);
+        setTracers(diagram.tracers);
+    }, [diagram]);
+
+
+
 
     const defaultTracer = {
         x: 5
@@ -161,13 +174,13 @@ const DiagramProperties = () => {
                     <label>Отображение осей</label>
                 </div>
             </div>
-            <div className={"flex flex-col justify-center items-center gap-2 border-b border-t border-black pb-5"}>
+            <div className={"flex flex-col justify-center items-center gap-2 border-t border-black pb-5 w-full"}>
                 <label className={""}>Трасеры</label>
-                <div className="flex flex-col overflow-auto">
+                <button className={"rounded-md border border-black mt-2 w-full"} onClick={handleAddTracer}>Добавить</button>
+                <div className="flex flex-col overflow-auto w-full">
                     {diagram.tracers.map((item, index) =>
-                        <Tracer tracer={item} index={index}/>
+                        <Tracer classname={"w-full"} tracer={item} index={index}/>
                     )}
-                    <button className={"rounded-md border border-black mt-2"} onClick={handleAddTracer}>Добавить</button>
                 </div>
             </div>
 

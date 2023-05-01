@@ -1,21 +1,23 @@
-import React, {useRef, useEffect, useContext, useState} from 'react';
+import React, {useRef, useEffect, useContext, useState, useImperativeHandle, useCallback} from 'react';
 import { SVG } from '@svgdotjs/svg.js';
 import { ReactSVG } from 'react-svg';
 import {CurrentItemContext} from "../../DiagramProperties/CurrentItemContext";
 import diagramContext, {DiagramContext} from "../../DiagramProperties/DiagramContext";
-import {next} from "lodash/seq";
+import {SvgContext} from "./SvgContext";
 
 
 const DiagramRenderer = () => {
     const containerRef = useRef();
     const {currentItem, updateCurrentItem} = useContext(CurrentItemContext);
     const {diagram, updateSignal, updateDiagram} = useContext(DiagramContext);
+    const {svg, updateSvg} = useContext(SvgContext);
     const [selected, setSelected] = useState(null) // Множество для хранения выделенных элементов
-    let isCtrlPressed = false;
-    let isShiftPressed = false;
-    let isLineDragged = false;
+    const isCtrlPressed = useRef(false);
+    const isShiftPressed = useRef(false);
+    const isLineDragged = useRef(false);
     let draggedLineIndex = null;
     let offsetX = 0;
+
 
 
     /**
@@ -89,10 +91,12 @@ const DiagramRenderer = () => {
 
     function onKeyDown(event) {
         if (event.key === 'Control') {
-            isCtrlPressed = true;
-        } else if (event.key === 'Shift') {
-            isShiftPressed = true;
-        } else if (event.key === 'Escape' || event.keyCode === 27) {
+            isCtrlPressed.current = true;
+        }
+        if (event.key === 'Shift') {
+            isShiftPressed.current = true;
+        }
+        if (event.key === 'Escape' || event.keyCode === 27) {
            setSelected(null);
            updateCurrentItem({
                type: 'diagram'
@@ -102,9 +106,10 @@ const DiagramRenderer = () => {
 
     function onKeyUp(event) {
         if (event.key === 'Control') {
-            isCtrlPressed = false;
-        } else if (event.key === 'Shift') {
-            isShiftPressed = false;
+            isCtrlPressed.current = false;
+        }
+        if (event.key === 'Shift') {
+            isShiftPressed.current = false;
         }
     }
 
@@ -158,61 +163,12 @@ const DiagramRenderer = () => {
             }
         }
 
-        //Отрисовка осей
-        if (showAxes) {
-            svg
-                .line(startPaddingX, diagramHeight, startPaddingX, 0)
-                .stroke({ color: 'black', width: 1 })
-                .attr({ 'marker-end': arrow }); // Добавляем маркер (стрелку) к концу линии;
-            svg
-                .line(startPaddingX, diagramHeight, diagramWidth, diagramHeight)
-                .stroke({ color: 'black', width: 1 })
-                .attr({ 'marker-end': arrow }); // Добавляем маркер (стрелку) к концу линии
-        }
-
-        //Отрисовка трассеров
-        tracers.forEach((tracer, index) => {
-            const tracerLine = svg.line(tracer.x,0,tracer.x, diagramHeight+1)
-                .stroke({color: 'green', width: 1});
-            const tracerEdit = svg.line(tracer.x, 0, tracer.x,diagramHeight+1)
-                .stroke({ color: 'transparent', width: 6 })
-                .attr({'cursor' : 'ew-resize'})
-                .on('mousedown', (e) => {
-                    isLineDragged = true;
-                    draggedLineIndex = index;
-                    offsetX = e.clientX - parseFloat(tracerEdit.attr("x1"));
-                    svg.on('mousemove', (e) => {
-                        if(isLineDragged && draggedLineIndex === index) {
-                            const newX = e.clientX - offsetX;
-                            tracerLine.attr("x1", newX);
-                            tracerLine.attr("x2", newX);
-                            tracerEdit.attr("x1", newX);
-                            tracerEdit.attr("x2", newX);
-                        }
-                    })
-                        .on('mouseup', () => {
-                            if(isLineDragged && draggedLineIndex === index) {
-                                const newTracers = tracers;
-                                newTracers[index].x = tracerLine.attr("x1");
-                                updateDiagram({
-                                    tracers: newTracers
-                                })
-                            }
-                            svg.on('mouseup', () => {});
-                            svg.on('mousemove', () => {});
-                            draggedLineIndex = null;
-                            isLineDragged = false;
-                        })
-                })
-
-        })
-
         /**
          * Отрисовка сигналов
          */
             //Отрисовка сигнальной линии
         const drawAreaLine = (x1,y1, x2,y2) => {
-                svg.line(x1, y1, x2, y2).stroke({ color: 'blue', width: 2 });
+                svg.line(x1, y1, x2, y2).stroke({ color: 'blue', width: 2, linecap: 'round' });
             };
 
         signals.forEach((signal, index) => {
@@ -357,6 +313,63 @@ const DiagramRenderer = () => {
             });
         });
 
+        //Отрисовка трассеров
+        tracers.forEach((tracer, index) => {
+            const tracerLine = svg.line(tracer.x,0,tracer.x, diagramHeight+5)
+                .stroke({color: 'green', width: 1});
+            const tracerEdit = svg.line(tracer.x, 0, tracer.x,diagramHeight+1)
+                .stroke({ color: 'transparent', width: 6 })
+                .attr({'cursor' : 'ew-resize'})
+                .on('mousedown', (e) => {
+                    isLineDragged.current = true;
+                    draggedLineIndex = index;
+                    offsetX = e.clientX - parseFloat(tracerEdit.attr("x1"));
+                    svg.on('mousemove', (e) => {
+                        if(isLineDragged.current && draggedLineIndex === index) {
+                            const newX = e.clientX - offsetX;
+                            tracerLine.attr("x1", newX);
+                            tracerLine.attr("x2", newX);
+                            tracerEdit.attr("x1", newX);
+                            tracerEdit.attr("x2", newX);
+                        }
+                    })
+                        .on('mouseup', () => {
+                            if(isLineDragged.current && draggedLineIndex === index) {
+                                const newTracers = tracers;
+                                newTracers[index].x = tracerLine.attr("x1");
+                                updateDiagram({
+                                    tracers: newTracers
+                                })
+                            }
+                            svg.on('mouseup', () => {});
+                            svg.on('mousemove', () => {});
+                            draggedLineIndex = null;
+                            isLineDragged.current = false;
+                        })
+                })
+
+        })
+
+
+        /**
+         * Отрисовка осей
+         */
+        //Отрисовка осей
+        if (showAxes) {
+            svg
+                .line(startPaddingX-1, diagramHeight+5, startPaddingX-1, 0)
+                .stroke({ color: 'black', width: 1 })
+                .attr({ 'marker-end': arrow }); // Добавляем маркер (стрелку) к концу линии;
+            svg
+                .line(startPaddingX-1, diagramHeight+5, diagramWidth, diagramHeight+5)
+                .stroke({ color: 'black', width: 1 })
+                .attr({ 'marker-end': arrow }); // Добавляем маркер (стрелку) к концу линии
+        }
+
+
+        //сохраняем готовую диаграмму
+        updateSvg(svg.svg());
+
         /**
          * Отрисовка редактирорования
          */
@@ -365,8 +378,8 @@ const DiagramRenderer = () => {
             const lineStyleActive = {color: 'black', width: 2, opacity: 1};
             const line = svg.line(x1,y,x2,y)
                 .stroke(lineStyleDefault);
-            const clickableLine = svg.line(x1, y-2, x2, y-2)
-                .stroke({color: 'transparent', width: 4})
+            const clickableLine = svg.line(x1, y, x2, y)
+                .stroke({color: 'transparent', width: 8})
                 .on('mouseover', () => {
                     line.stroke(lineStyleActive)
                 })
@@ -412,14 +425,14 @@ const DiagramRenderer = () => {
                             //Если событие произошло при том же сигнале
                             let newSelected = selected;
                             if(newSelected != null && newSelected.signalIndex === index) {
-                                if(isCtrlPressed) {
+                                if(isCtrlPressed.current) {
                                     if(newSelected.selectedAreas.includes(areaIndex)) {
                                         const indexDelete = newSelected.selectedAreas.indexOf(areaIndex);
                                         newSelected.selectedAreas.splice(indexDelete,1);
                                     } else {
                                         newSelected.selectedAreas.push(areaIndex);
                                     }
-                                } else if(isShiftPressed) {
+                                } else if(isShiftPressed.current) {
                                     let prevIndex = newSelected.selectedAreas[newSelected.selectedAreas.length-1];
                                     while(prevIndex > areaIndex) {
                                         prevIndex -=1;
@@ -546,11 +559,31 @@ const DiagramRenderer = () => {
 
     };
 
+    const exportPng = () => {
+
+    };
+
+    const exportSvg = () => {
+        console.log('here')
+        const svgString = containerRef.current.querySelector('svg');
+        const blob = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = diagram.name;
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const exportJson = () => {
+
+    }
+
 
     return (
-        <div ref={containerRef} style={{ width: '100%', height: '100%', overflow: 'auto', position: 'relative', padding: '10px' }}>
-            <ReactSVG src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3C/svg%3E" />
-        </div>
+            <div ref={containerRef} style={{ width: '100%', height: '100%', overflow: 'auto', position: 'relative', padding: '10px' }}>
+                <ReactSVG src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3C/svg%3E" />
+            </div>
     );
 };
 

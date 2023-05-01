@@ -1,12 +1,11 @@
-import ToolbarItem from "./components/ToolbarItem";
+import ToolbarItem from "./components/FIleItem";
 import LoginButton from "./components/LoginButton";
+import FileItem from "./components/FIleItem";
 
 const Toolbar = (props) => {
 
     return <div className="flex gap-1 ml-2 py-1">
-        <ToolbarItem>Файл</ToolbarItem>
-        <ToolbarItem>Справка</ToolbarItem>
-        <ToolbarItem>Вид</ToolbarItem>
+        <FileItem>Файл</FileItem>
         <LoginButton user={props.user} onData={props.onData}>Войти</LoginButton>
     </div>;
 };

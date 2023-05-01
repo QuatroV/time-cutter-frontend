@@ -53,7 +53,7 @@ const Tracer = ({tracer, index}) => {
 
 
     return (
-        <div className="flex relative border-b items-center border-black gap-5 self-center pb-2">
+        <div className="flex relative border-b items-center border-black gap-5 self-center pb-2 w-full justify-center">
             <div className={"flex flex-col"}>
                 <label className={""}>Положение</label>
                 <input value={currentTracer.x}
