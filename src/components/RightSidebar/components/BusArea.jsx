@@ -1,4 +1,4 @@
-import {useContext, useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import { BsTrash3 } from 'react-icons/bs';
 import {IoIosArrowUp, IoIosArrowDown} from 'react-icons/io'
 import {DiagramContext} from "../../DiagramProperties/DiagramContext";
@@ -61,29 +61,69 @@ const BusArea = ({area, index, signal, signalIndex}) => {
         })
     }
 
+    const handleColorChange = (event) => {
+        setCurrentArea((prevArea) => ({...prevArea, color: event.target.value}));
+        const newAreas = [...signal.areas];
+        newAreas[index].color = event.target.value;
+        updateSignal(currentItem.index, {
+            areas: newAreas
+        })
+    }
+
+    const handleIsHatchingNeedChange = (event) => {
+        setCurrentArea((prevArea) => ({...prevArea, isHatchingNeed: event.target.checked}));
+        const newAreas = [...signal.areas];
+        newAreas[index].isHatchingNeed = event.target.checked;
+        updateSignal(currentItem.index, {
+            areas: newAreas
+        })
+    }
+
     return (
-        <div className="flex relative border-b items-center border-black gap-5 self-center pb-2">
-            <div className={"flex flex-col"}>
-                <label className={""}>Значение</label>
-                <input value={currentArea.value}
-                       className={"rounded-md border border-black px-2 w-20 text-center"}
-                       onChange={handleValueChange}/>
+        <div className="flex-row relative border-b items-center border-black gap-5 self-center pb-2 w-full">
+            <div className={"flex gap-5 w-full"}>
+                <div className={"flex flex-col"}>
+                    <label className={""}>Значение</label>
+                    <input value={currentArea.value}
+                           className={"rounded-md border border-black px-2 w-20 text-center"}
+                           onChange={handleValueChange}/>
+                </div>
+                <div className={"flex flex-col"}>
+                    <label>Шаги</label>
+                    <input value={currentArea.steps}
+                           type={"number"}
+                           min={1}
+                           className={"rounded-md border border-black px-2 w-20 text-center"}
+                           onChange={handleStepsChange}
+                           pattern="[0123456789]+"
+                           onKeyDown={handleKeyDown}
+                    />
+                </div>
+                <div className={"absolute left-48 top-12"}>
+                    <button onClick={removeButtonAction} className="bg-gray-200 rounded-full p-1 hover:border hover:border-black hover:full-rounded">
+                        <BsTrash3 className="text-xs" />
+                    </button>
+                </div>
             </div>
-            <div className={"flex flex-col"}>
-                <label>Шаги</label>
-                <input value={currentArea.steps}
-                       type={"number"}
-                       min={1}
-                       className={"rounded-md border border-black px-2 w-20 text-center"}
-                       onChange={handleStepsChange}
-                       pattern="[0123456789]+"
-                       onKeyDown={handleKeyDown}
-                       />
-            </div>
-            <div className={"flex flex-col self-center"}>
-                <button onClick={removeButtonAction} className="bg-gray-200 rounded-full p-1 hover:border hover:border-black hover:full-rounded">
-                    <BsTrash3 className="text-xs" />
-                </button>
+            <div className={"w-full self-center flex flex-col items-center"}>
+                <label>Заливка</label>
+                <div className={"flex w-full"}>
+                    <input
+                        className={"w-7 h-7 ml-5 mr-5 cursor-pointer"}
+                        type={"color"}
+                        onChange={handleColorChange}
+                        value={currentArea.color}
+                        defaultValue={"#ff"}
+                    />
+                    <label className={"mr-2 "}>Штриховка</label>
+                    <input
+                    type={"checkbox"}
+                    className={"cursor-pointer"}
+                    checked={currentArea.isHatchingNeed}
+                    onChange={handleIsHatchingNeedChange}
+                    />
+                </div>
+
             </div>
         </div>
 

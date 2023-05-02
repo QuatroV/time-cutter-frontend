@@ -247,7 +247,7 @@ const DiagramRenderer = () => {
                 {
                     let currentStep = 0;
                     areas.forEach((area, areaIndex) => {
-                        const {value, steps, padding} = area;
+                        const {value, steps, padding, color, isHatchingNeed} = area;
                         //Добавляем в конец, если в след элементе есть задержка
                         let nextAreaPadding = 0;
                         if(areas.length - 1 > areaIndex && areas[areaIndex+1].padding > 0) {
@@ -255,14 +255,27 @@ const DiagramRenderer = () => {
                         }
                         const startX = xWithPadding(currentStep * stepWidth + area.padding);
                         const endX = xWithPadding(currentStep*stepWidth + area.steps*stepWidth + nextAreaPadding);
+                        let path;
                         if (areaIndex > 0) {
+                            if(areaIndex !== areas.length - 1) {
+                                path = svg.path(`M ${startX+4} ${y+signalHeight/2} L ${startX+8} ${y} L ${endX} ${y} L ${endX+4} ${y+(signalHeight/2)} L ${endX} ${y+signalHeight} L ${startX+8} ${y+signalHeight} L ${startX+4} ${y+signalHeight/2} Z`);
+                            } else {
+                                path = svg.path(`M ${startX+4} ${y+signalHeight/2} L ${startX+8} ${y} L ${endX} ${y} V ${y+signalHeight} L ${startX+8} ${y+signalHeight} L ${startX+4} ${y+signalHeight/2} Z`);
+                            }
                             drawAreaLine(startX,y, startX + 8, y + signalHeight);
                             drawAreaLine(startX,y+signalHeight, startX + 8, y);
                             drawAreaLine(startX+8, y, endX, y);
                             drawAreaLine(startX+8, y+signalHeight, endX, y+signalHeight);
                         } else {
+                            path = svg.path(`M ${startX} ${y} L ${endX} ${y} L ${endX+4} ${y+(signalHeight/2)} L ${endX} ${y+signalHeight} L ${startX} ${y+signalHeight} V ${y} Z`);
                             drawAreaLine(startX, y, endX, y);
                             drawAreaLine(startX, y+signalHeight, endX, y+signalHeight);
+                        }
+                        if(color != null) {
+                            path.fill(color).attr('fill-opacity', 0.7);
+                        }
+                        if(isHatchingNeed) {
+                            path.attr('fill', "url(#hatch)")
                         }
                         svg.text(area.value)
                             .font({ family: 'Arial', size: 15, anchor: 'middle', weight: "bold"})
@@ -583,6 +596,11 @@ const DiagramRenderer = () => {
     return (
             <div ref={containerRef} style={{ width: '100%', height: '100%', overflow: 'auto', position: 'relative', padding: '10px' }}>
                 <ReactSVG src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3C/svg%3E" />
+                <defs>
+                    <pattern id="hatch" patternUnits="userSpaceOnUse" width="10" height="10">
+                        <line x1="0" y1="0" x2="10" y2="10" stroke="black" stroke-width="1" />
+                    </pattern>
+                </defs>
             </div>
     );
 };
