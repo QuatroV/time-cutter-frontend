@@ -20,6 +20,7 @@ const DiagramRenderer = () => {
 
 
 
+
     /**
      * Перерисовка диаграммы при её изменении
      */
@@ -245,6 +246,9 @@ const DiagramRenderer = () => {
                 }
                 case 'bus':
                 {
+                    const pattern = svg.pattern(10,10, function (add) {
+                        add.line(0, 0, 10, 10).stroke({ width: 1, color: 'black' });
+                    });
                     let currentStep = 0;
                     areas.forEach((area, areaIndex) => {
                         const {value, steps, padding, color, isHatchingNeed} = area;
@@ -275,7 +279,7 @@ const DiagramRenderer = () => {
                             path.fill(color).attr('fill-opacity', 0.7);
                         }
                         if(isHatchingNeed) {
-                            path.attr('fill', "url(#hatch)")
+                           path.fill(pattern);
                         }
                         svg.text(area.value)
                             .font({ family: 'Arial', size: 15, anchor: 'middle', weight: "bold"})
@@ -596,11 +600,6 @@ const DiagramRenderer = () => {
     return (
             <div ref={containerRef} style={{ width: '100%', height: '100%', overflow: 'auto', position: 'relative', padding: '10px' }}>
                 <ReactSVG src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3C/svg%3E" />
-                <defs>
-                    <pattern id="hatch" patternUnits="userSpaceOnUse" width="10" height="10">
-                        <line x1="0" y1="0" x2="10" y2="10" stroke="black" stroke-width="1" />
-                    </pattern>
-                </defs>
             </div>
     );
 };
