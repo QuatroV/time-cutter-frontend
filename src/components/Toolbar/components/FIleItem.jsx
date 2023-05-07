@@ -2,6 +2,8 @@ import {useContext, useEffect, useRef, useState} from "react";
 import CreateModal from "./CreateModal";
 import {DiagramContext} from "../../DiagramProperties/DiagramContext";
 import {SvgContext} from "../../Graph/components/SvgContext";
+import axios from "axios";
+import FileSelect from "./FileSelect";
 
 const FileItem = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -9,6 +11,7 @@ const FileItem = () => {
     const fileInput = useRef(null);
     const [currentSubMenu, setCurrentSubMenu] = useState(null);
     const [isCreateModal, setIsCreateModal] = useState(false);
+    const [isFileSelect, setIsFileSelect] = useState(false);
     const {diagram, createDefaultDiagram, updateDiagramFull} = useContext(DiagramContext);
     const {svg} = useContext(SvgContext);
 
@@ -132,12 +135,47 @@ const FileItem = () => {
         }
     };
 
+    const handleFileOpenClose = () => {
+        setIsFileSelect(false);
+    }
+
+    const handleSaveOnServerClick = () => {
+        const login = sessionStorage.getItem("login");
+        const token = JSON.parse(sessionStorage.getItem("tokens")).accessToken;
+        const formData = new FormData();
+        const json = JSON.stringify(diagram);
+        const blob = new Blob([json], { type: 'application/json' });
+        formData.append('file', blob);
+        formData.append('login',login)
+        formData.append('diagramName', diagram.name);
+
+        axios.post("http://localhost:8080/api/storage/save", formData, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'multipart/form-data'
+            }
+        }).then((resp) => {
+            alert('Диаграмма ' + diagram.name + ' успешно сохранена на сервере!');
+        }).catch(error => {
+            alert(error);
+            console.error(error);
+        });
+    }
+
+    const handleOpenFromServerClick = () => {
+        setCurrentSubMenu(null);
+        setIsOpen(false);
+        setIsFileSelect(true);
+    }
+
     return <div ref={dropdownRef} className="cursor-pointer hover:bg-gray-300 rounded-lg px-2 py-0.5 active:shadow-inner z-10 relative">
         <button onClick={handleButtonClick}>Файл</button>
         {isOpen && (
             <div className="absolute top-8 left-0 inline-block bg-gray-100 p-1 rounded-lg">
                 <ul className="flex flex-col gap-1">
-                    <li onClick={handleCreateClick} className="hover:bg-gray-200 py-1 rounded-t-lg px-4 border">Создать</li>
+                    <li onClick={handleCreateClick} className="hover:bg-gray-200 py-1 px-4 rounded-b-lg border">Создать</li>
+                    <li onClick={handleOpenFromServerClick} className="hover:bg-gray-200 py-1 px-4 border">Открыть</li>
+                    <li onClick={handleSaveOnServerClick} className="hover:bg-gray-200 py-1 px-4 border">Сохранить</li>
                     <li onClick={handleExportClick} className="hover:bg-gray-200 py-1 px-4 border">Экспорт</li>
                     <li onClick={handleImportClick} className="hover:bg-gray-200 py-1 px-4 rounded-b-lg border">Импорт</li>
                 </ul>
@@ -162,6 +200,7 @@ const FileItem = () => {
             </div>
             )}
         {isCreateModal && <CreateModal handleCancel={handleCreateCancel} handleContinue={handleCreateContinue}/>}
+        {isFileSelect && <FileSelect handleClose={handleFileOpenClose}/>}
     </div>
 
 

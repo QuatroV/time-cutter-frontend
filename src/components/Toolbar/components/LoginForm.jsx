@@ -24,7 +24,7 @@ const LoginForm = (props) => {
             'login': loginForm,
             'password': passwordForm
         }).then((resp) => {
-                sessionStorage.setItem("tokens", resp.data);
+                sessionStorage.setItem("tokens", JSON.stringify(resp.data));
                 sessionStorage.setItem("login", loginForm);
                 updateLogin(loginForm);
                 props.onClose();

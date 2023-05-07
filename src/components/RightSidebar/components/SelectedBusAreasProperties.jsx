@@ -11,12 +11,17 @@ const SelectedBusAreasProperties = () => {
     }
     const [genValue, setGenValue] = useState(currentItem.areas.length === 1? getArea(0).value : '');
     const [padding, setPadding] = useState(currentItem.areas.length === 1? getArea(0).padding : '');
-    const [steps, setSteps] = useState(currentItem.areas.length === 1? getArea(0).steps : '')
+    const [steps, setSteps] = useState(currentItem.areas.length === 1? getArea(0).steps : '');
+    const [color, setColor] = useState(currentItem.areas.length === 1? getArea(0).color : '');
+    const [isHatchingNeed, setIsHatchingNeed] = useState(currentItem.areas.length === 1? getArea(0).isHatchingNeed : '');
 
     useEffect(() => {
         setGenValue(currentItem.areas.length === 1? getArea(0).value : '');
         setPadding(currentItem.areas.length === 1? getArea(0).padding : '');
         setSteps(currentItem.areas.length === 1? getArea(0).steps : '');
+        setColor(currentItem.areas.length === 1? getArea(0).color : '');
+        setIsHatchingNeed(currentItem.areas.length === 1? getArea(0).isHatchingNeed : '')
+
     }, [currentItem, updateCurrentItem]);
 
     const handleValueChanged = (event) => {
@@ -81,6 +86,30 @@ const SelectedBusAreasProperties = () => {
         }
     }
 
+    const handleColorChange = (event) => {
+        setColor(event.target.value);
+        const indexes = currentItem.areas;
+        const tempAreas = diagram.signals[currentItem.index].areas;
+        for(let i = 0; i < indexes.length; i++) {
+            tempAreas[indexes[i]].color = event.target.value;
+        }
+        updateSignal(currentItem.index, {
+            areas: tempAreas
+        })
+    }
+
+    const handleIsHatchingNeedChange = (event) => {
+        setIsHatchingNeed(event.target.checked);
+        const indexes = currentItem.areas;
+        const tempAreas = diagram.signals[currentItem.index].areas;
+        for(let i = 0; i < indexes.length; i++) {
+            tempAreas[indexes[i]].isHatchingNeed = event.target.checked;
+        }
+        updateSignal(currentItem.index, {
+            areas: tempAreas
+        })
+    }
+
 
 
     return (
@@ -118,6 +147,25 @@ const SelectedBusAreasProperties = () => {
                        pattern="[0123456789]+"
                        onKeyDown={handleKeyDown}
                 />
+            </div>
+            <div className={"w-full self-center flex flex-col items-center"}>
+                <label>Заливка</label>
+                <div className={"flex w-full"}>
+                    <input
+                        className={"w-7 h-7 ml-5 mr-5 cursor-pointer"}
+                        type={"color"}
+                        onChange={handleColorChange}
+                        value={color}
+                        defaultValue={"#ff"}
+                    />
+                    <label className={"mr-2 "}>Штриховка</label>
+                    <input
+                        type={"checkbox"}
+                        className={"cursor-pointer"}
+                        checked={isHatchingNeed}
+                        onChange={handleIsHatchingNeedChange}
+                    />
+                </div>
             </div>
 
         </div>

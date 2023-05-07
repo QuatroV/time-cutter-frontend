@@ -12,7 +12,9 @@ const BusProperties = () => {
     const defaultArea = {
         value : '',
         steps : 1,
-        padding: 0
+        padding: 0,
+        color: '#ffffff',
+        isHatchingNeed:  false
     };
 
     useEffect(() => {

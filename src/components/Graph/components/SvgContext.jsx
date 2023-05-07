@@ -1,4 +1,4 @@
-import React, {createContext, useState} from 'react';
+      import React, {createContext, useState} from 'react';
 
 // Создаем контекст
 export const SvgContext = createContext("");

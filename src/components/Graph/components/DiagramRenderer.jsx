@@ -4,6 +4,7 @@ import { ReactSVG } from 'react-svg';
 import {CurrentItemContext} from "../../DiagramProperties/CurrentItemContext";
 import diagramContext, {DiagramContext} from "../../DiagramProperties/DiagramContext";
 import {SvgContext} from "./SvgContext";
+import {addTextToBusArea, createBitAreaPath, createBusAreaPath} from "./DrawUtils";
 
 
 const DiagramRenderer = () => {
@@ -246,9 +247,16 @@ const DiagramRenderer = () => {
                 }
                 case 'bus':
                 {
-                    const pattern = svg.pattern(10,10, function (add) {
-                        add.line(0, 0, 10, 10).stroke({ width: 1, color: 'black' });
+                    // создаем шаблон заполнения штриховкой
+                    const pattern = svg.pattern(10, 10, function(add) {
+                        add.line(0, 5, 10, 5).stroke({ width: 1, color: 'black' }); // рисуем линию внутри шаблона
+                    }).attr({
+                        viewBox: '0 0 10 10', // устанавливаем координаты viewBox для шаблона
+                        fill: 'none', // устанавливаем заполнение шаблона как пустое
+                        patternTransform: 'rotate(45)' // устанавливаем угол наклона шаблона
                     });
+
+
                     let currentStep = 0;
                     areas.forEach((area, areaIndex) => {
                         const {value, steps, padding, color, isHatchingNeed} = area;
@@ -259,40 +267,27 @@ const DiagramRenderer = () => {
                         }
                         const startX = xWithPadding(currentStep * stepWidth + area.padding);
                         const endX = xWithPadding(currentStep*stepWidth + area.steps*stepWidth + nextAreaPadding);
-                        let path;
                         if (areaIndex > 0) {
-                            if(areaIndex !== areas.length - 1) {
-                                path = svg.path(`M ${startX+4} ${y+signalHeight/2} L ${startX+8} ${y} L ${endX} ${y} L ${endX+4} ${y+(signalHeight/2)} L ${endX} ${y+signalHeight} L ${startX+8} ${y+signalHeight} L ${startX+4} ${y+signalHeight/2} Z`);
-                            } else {
-                                path = svg.path(`M ${startX+4} ${y+signalHeight/2} L ${startX+8} ${y} L ${endX} ${y} V ${y+signalHeight} L ${startX+8} ${y+signalHeight} L ${startX+4} ${y+signalHeight/2} Z`);
-                            }
                             drawAreaLine(startX,y, startX + 8, y + signalHeight);
                             drawAreaLine(startX,y+signalHeight, startX + 8, y);
                             drawAreaLine(startX+8, y, endX, y);
                             drawAreaLine(startX+8, y+signalHeight, endX, y+signalHeight);
                         } else {
-                            path = svg.path(`M ${startX} ${y} L ${endX} ${y} L ${endX+4} ${y+(signalHeight/2)} L ${endX} ${y+signalHeight} L ${startX} ${y+signalHeight} V ${y} Z`);
                             drawAreaLine(startX, y, endX, y);
                             drawAreaLine(startX, y+signalHeight, endX, y+signalHeight);
                         }
-                        if(color != null) {
-                            path.fill(color).attr('fill-opacity', 0.7);
+                        const fillPath = createBusAreaPath(svg, areas, area, areaIndex, signalHeight, y, startX, endX);
+                        if(color != null && color !== '#ffffff') {
+                            fillPath.fill(color).attr('fill-opacity', 0.7);
+                        } else {
+                            fillPath.fill('none');
                         }
                         if(isHatchingNeed) {
-                           path.fill(pattern);
+                           fillPath.fill(pattern);
                         }
-                        svg.text(area.value)
-                            .font({ family: 'Arial', size: 15, anchor: 'middle', weight: "bold"})
-                            .fill("black")
-                            .move((endX+startX)/2, y+signalHeight/2-15)
-                            .attr({ 'text-anchor': 'end', 'dominant-baseline': 'central'});
+                        //Добавляем текст
+                        addTextToBusArea(svg, area,fillPath)
                         currentStep+=Number(area.steps);
-
-                        //Дорисовываем хвостик предыдущего сигнала если есть padding
-                        // if(area.padding !== 0) {
-                        //     drawAreaLine(startX-padding, y, startX, y);
-                        //     drawAreaLine(startX-padding, y+signalHeight, startX, y+signalHeight);
-                        // }
                     })
                     break;
                 }
@@ -422,11 +417,20 @@ const DiagramRenderer = () => {
             }
 
             tempAreas.forEach((area, areaIndex) => {
+                let nextAreaPadding = 0;
+                if(areas.length - 1 > areaIndex && areas[areaIndex+1].padding > 0) {
+                    nextAreaPadding = areas[areaIndex+1].padding;
+                }
                 let startX;
                 let endX;
-                if(type === 'bus' && area !== null) {
-                    startX = xWithPadding(currentStep * stepWidth);
-                    endX = xWithPadding(currentStep*stepWidth + area.steps*stepWidth);
+                if(area != null) {
+                    if(type === 'bus') {
+                        startX = xWithPadding(currentStep * stepWidth + area.padding);
+                        endX = xWithPadding(currentStep*stepWidth + area.steps*stepWidth + nextAreaPadding);
+                    } else {
+                        startX = xWithPadding(areaIndex * stepWidth + area.padding);
+                        endX = xWithPadding((areaIndex + 1) * stepWidth + nextAreaPadding);
+                    }
                 } else {
                     startX = xWithPadding(areaIndex * stepWidth);
                     endX = xWithPadding((areaIndex + 1) * stepWidth);
@@ -434,8 +438,26 @@ const DiagramRenderer = () => {
 
                 //Отрисовка клеток для выделения
                 if(areaIndex !== tempAreas.length-1 || type === 'bus') {
-                    const rect = svg.rect(endX - startX, signalHeight).fill('transparent').move(startX, y);
-                    rect.on('contextmenu', (event) => {
+                    let areaPath;
+                    if(type === 'bus') {
+                        areaPath = createBusAreaPath(svg, areas, area, areaIndex, signalHeight, y, startX, endX)
+                            .fill('transparent');
+                    } else if(type === 'bit') {
+                        areaPath = createBitAreaPath(svg, areas, area, areaIndex, signalHeight, y, startX, endX)
+                            .fill('transparent');
+                    } else {
+                        areaPath = svg.rect(endX - startX, signalHeight).fill('transparent').move(startX, y);
+                    }
+
+                    areaPath.on('mouseover', () => {
+                        areaPath.stroke({ color: 'black' });
+                    })
+
+                    areaPath.on('mouseout', () => {
+                        areaPath.stroke({ color: 'transparent' });
+                    })
+
+                    areaPath.on('contextmenu', (event) => {
                         event.preventDefault();
                     })
                         .on('click', () => {
@@ -511,7 +533,7 @@ const DiagramRenderer = () => {
                         .attr({ 'cursor': 'pointer'});
 
                     if(selected != null && selected.signalIndex === index && selected.selectedAreas.includes(areaIndex)) {
-                        rect.fill(selectedAreaStyle);
+                        areaPath.fill(selectedAreaStyle);
                     }
                 }
 
