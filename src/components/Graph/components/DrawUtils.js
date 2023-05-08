@@ -50,6 +50,18 @@ export function addTextToBusArea(svg, area, areaPath) {
         .attr({ 'text-anchor': 'end'});
 }
 
+/**
+ * Отрисовать path битового сигнала
+ * @param svg
+ * @param areas
+ * @param area
+ * @param areaIndex
+ * @param signalHeight
+ * @param y
+ * @param startX
+ * @param endX
+ * @returns {*}
+ */
 export function createBitAreaPath(svg, areas, area, areaIndex, signalHeight, y, startX, endX) {
     let nextArea;
     let pathPattern=``;
@@ -99,3 +111,172 @@ export function createBitAreaPath(svg, areas, area, areaIndex, signalHeight, y, 
 
     return svg.path(pathPattern);
 }
+
+/**
+ * Отрисовать path битового сигнала
+ * @param svg
+ * @param areas
+ * @param area
+ * @param areaIndex
+ * @param signalHeight
+ * @param y
+ * @param startX
+ * @param endX
+ * @returns {*}
+ */
+export function createBitAreaPathNew(svg, areas, area, areaIndex, signalHeight, y, startX, endX) {
+    let nextArea;
+    let prevArea;
+    let pathPattern=``;
+    if(areas.length - 1 > areaIndex) {
+        nextArea = areas[areaIndex+1];
+    }
+    if(areaIndex > 0) {
+        prevArea = areas[areaIndex-1];
+    }
+
+    /**
+     * Начало
+     */
+    if(area.value == 0) {
+        if(prevArea !== null && prevArea.value !== area.value) {
+            const prevValue = prevArea.value;
+            if(prevValue == 1) {
+                pathPattern+= `M ${startX} ${y} L ${startX+8} ${y+signalHeight} H ${endX}`
+            }
+
+            if(prevValue === 'z') {
+                pathPattern+= `M ${startX} ${y+signalHeight/2} L ${startX+8} ${y+signalHeight} H ${endX}`
+            }
+
+        } else {
+            pathPattern+= `M ${startX} ${y+signalHeight} H ${endX}`
+        }
+    }
+
+    if(area.value == 1) {
+        if(prevArea !== null && prevArea.value !== area.value) {
+            const prevValue = prevArea.value;
+            if(prevValue == 0) {
+                pathPattern+= `M ${startX} ${y+signalHeight} L ${startX+8} ${y} H ${endX}`
+            }
+
+            if(prevValue === 'z') {
+                pathPattern+= `M ${startX} ${y+signalHeight/2} L ${startX+8} ${y} H ${endX}`
+            }
+
+        } else {
+            pathPattern+= `M ${startX} ${y} H ${endX}`
+        }
+    }
+
+    if(area.value == 'z') {
+        if(prevArea !== null && prevArea.value !== area.value) {
+            const prevValue = prevArea.value;
+            if(prevValue == 1) {
+                pathPattern+= `M ${startX} ${y} L ${startX+8} ${y+signalHeight/2} H ${endX}`
+            }
+
+            if(prevValue === 0) {
+                pathPattern+= `M ${startX} ${y+signalHeight} L ${startX+8} ${y+signalHeight/2} H ${endX}`
+            }
+        } else {
+            pathPattern+= `M ${startX} ${y+signalHeight/2} H ${endX}`
+        }
+    }
+
+    /**
+     * Конец
+     */
+    if(area.value == 0) {
+        if(nextArea !== null && nextArea.value !== area.value) {
+            const nextValue = nextArea.value;
+            if(nextValue == 1) {
+                pathPattern+= `M ${startX} ${y} L ${startX+8} ${y+signalHeight} H ${endX}`
+            }
+
+            if(nextValue === 'z') {
+                pathPattern+= `M ${startX} ${y+signalHeight/2} L ${startX+8} ${y+signalHeight} H ${endX}`
+            }
+
+        } else {
+            pathPattern+= `M ${startX} ${y+signalHeight} H ${endX}`
+        }
+    }
+
+    if(area.value == 1) {
+
+    }
+
+    if(area.value == 'z') {
+
+    }
+
+
+    return svg.path(pathPattern);
+}
+
+export function drawBitArea(svg, areas, area, areaIndex, signalHeight, y, startX, endX) {
+    let prevArea = null;
+    let prevValue = null;
+
+    if(areaIndex !== 0) {
+        prevArea = areas[areaIndex-1];
+        prevValue = prevArea.value;
+    }
+
+    if(area.value == 1) {
+        if(prevArea != null && prevValue !== area.value) {
+            if(prevValue == 0) {
+                drawAreaLine(svg,startX, y+signalHeight, startX+8, y);
+            }
+            if(prevValue === 'z') {
+                drawAreaLine(svg, startX, y+signalHeight/2, startX+8, y);
+            }
+            drawAreaLine(svg,startX+8, y, endX, y);
+        } else {
+            drawAreaLine(svg,startX, y, endX, y);
+        }
+    }
+
+    if(area.value == 0) {
+        if(prevArea != null && prevValue !== area.value) {
+            if (prevValue == 1) {
+                drawAreaLine(svg,startX, y, startX+8, y+signalHeight);
+            }
+            if(prevValue == 'z') {
+                drawAreaLine(svg, startX, y+signalHeight/2, startX+8, y+signalHeight);
+            }
+            drawAreaLine(svg, startX+8, y+signalHeight, endX, y+signalHeight);
+        } else {
+            drawAreaLine(svg,startX, y+signalHeight, endX, y+signalHeight);
+        }
+    }
+
+    if(area.value === 'z') {
+        if(prevArea != null && prevValue !== area.value) {
+            if(prevValue == 1) {
+                drawAreaLine(svg,startX, y, startX+8, y+signalHeight/2);
+            }
+            if(prevValue == 0) {
+                drawAreaLine(svg,startX, y+signalHeight, startX+8, y+signalHeight/2)
+            }
+            drawAreaLine(svg,startX+8, y+signalHeight/2, endX, y+signalHeight/2);
+        } else {
+            drawAreaLine(svg,startX, y+signalHeight/2, endX, y+signalHeight/2);
+        }
+    }
+    if(area.padding !== 0 && prevValue != null) {
+        if(prevValue == 1) {
+            drawAreaLine(svg,startX-area.padding, y, startX, y);
+        } else if(prevArea == 0) {
+            drawAreaLine(svg,startX-area.padding, y+signalHeight, startX, y+signalHeight);
+        } else if(prevArea === 'z') {
+            drawAreaLine(svg,startX-area.padding, y+signalHeight/2, startX, y+signalHeight/2);
+        }
+    }
+}
+
+export const drawAreaLine = (svg, x1,y1, x2,y2) => {
+    svg.line(x1, y1, x2, y2).stroke({ color: 'blue', width: 2, linecap: 'round' });
+};

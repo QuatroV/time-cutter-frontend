@@ -40,7 +40,7 @@ const BitProperties = () => {
 
 
     function handleKeyPress(event) {
-        const allowedChars = ['0', '1', '~', '/','Delete','Backspace', 'ArrowLeft', 'ArrowRight'];
+        const allowedChars = ['0', '1', 'z','~', '/','Delete','Backspace', 'ArrowLeft', 'ArrowRight'];
         const pressedKey = event.key;
         if (!allowedChars.includes(pressedKey)) {
             event.preventDefault();

@@ -19,7 +19,7 @@ const SelectedAreasProperties = () => {
 
     const handleValueChanged = (event) => {
         setGenValue(event.target.value);
-        if(event.target.value !== 'z' && event.target.value !== '') {
+        if(event.target.value !== '') {
             const indexes = currentItem.areas;
             const tempAreas = diagram.signals[currentItem.index].areas;
             for(let i = 0; i < indexes.length; i++) {

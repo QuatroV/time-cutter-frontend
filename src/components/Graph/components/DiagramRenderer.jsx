@@ -4,7 +4,7 @@ import { ReactSVG } from 'react-svg';
 import {CurrentItemContext} from "../../DiagramProperties/CurrentItemContext";
 import diagramContext, {DiagramContext} from "../../DiagramProperties/DiagramContext";
 import {SvgContext} from "./SvgContext";
-import {addTextToBusArea, createBitAreaPath, createBusAreaPath} from "./DrawUtils";
+import {addTextToBusArea, createBitAreaPath, createBusAreaPath, drawAreaLine, drawBitArea} from "./DrawUtils";
 
 
 const DiagramRenderer = () => {
@@ -168,9 +168,7 @@ const DiagramRenderer = () => {
          * Отрисовка сигналов
          */
             //Отрисовка сигнальной линии
-        const drawAreaLine = (x1,y1, x2,y2) => {
-                svg.line(x1, y1, x2, y2).stroke({ color: 'blue', width: 2, linecap: 'round' });
-            };
+
 
         signals.forEach((signal, index) => {
             const { name, type, areas, divider } = signal;
@@ -184,32 +182,33 @@ const DiagramRenderer = () => {
                         const {value, padding} = area;
                         const startX = xWithPadding(areaIndex * stepSize/divider + padding);
                         const endX = xWithPadding((areaIndex + 1) * stepSize/divider);
-                        if (areaIndex > 0 && areas[areaIndex-1].value !== value) {
-                            const prevValue = areas[areaIndex - 1].value;
-                            if(prevValue < value) {
-                                drawAreaLine(startX, y+signalHeight, startX+8, y);
-                                drawAreaLine(startX+8, y, endX, y);
-                            } else {
-                                drawAreaLine(startX, y, startX+8, y+signalHeight);
-                                drawAreaLine(startX+8, y+signalHeight, endX, y+signalHeight);
-                            }
-
-                        } else {
-                            if (value === '1') {
-                                drawAreaLine(startX, y, endX, y);
-                            } else if(value === '0') {
-                                drawAreaLine(startX, y + signalHeight, endX, y + signalHeight)
-                            }
-                        }
-                        //Дорисовываем хвостик от пред сигнала если надо
-                        if(areaIndex > 0 && padding !== 0) {
-                            const prevValue = areas[areaIndex - 1].value;
-                            if(prevValue === '1') {
-                                drawAreaLine(startX-padding, y, startX, y);
-                            } else {
-                                drawAreaLine(startX-padding, y+signalHeight, startX, y+signalHeight);
-                            }
-                        }
+                        drawBitArea(svg, areas,area,areaIndex,signalHeight,y,startX,endX);
+                        // if (areaIndex > 0 && areas[areaIndex-1].value !== value) {
+                        //     const prevValue = areas[areaIndex - 1].value;
+                        //     if(prevValue < value) {
+                        //         drawAreaLine(svg,startX, y+signalHeight, startX+8, y);
+                        //         drawAreaLine(svg,startX+8, y, endX, y);
+                        //     } else {
+                        //         drawAreaLine(svg,startX, y, startX+8, y+signalHeight);
+                        //         drawAreaLine(svg,startX+8, y+signalHeight, endX, y+signalHeight);
+                        //     }
+                        //
+                        // } else {
+                        //     if (value === '1') {
+                        //         drawAreaLine(svg,startX, y, endX, y);
+                        //     } else if(value === '0') {
+                        //         drawAreaLine(svg,startX, y + signalHeight, endX, y + signalHeight)
+                        //     }
+                        // }
+                        // //Дорисовываем хвостик от пред сигнала если надо
+                        // if(areaIndex > 0 && padding !== 0) {
+                        //     const prevValue = areas[areaIndex - 1].value;
+                        //     if(prevValue === '1') {
+                        //         drawAreaLine(svg,startX-padding, y, startX, y);
+                        //     } else {
+                        //         drawAreaLine(svg,startX-padding, y+signalHeight, startX, y+signalHeight);
+                        //     }
+                        // }
                     })
                     break;
                 }
@@ -221,24 +220,24 @@ const DiagramRenderer = () => {
                         const startX = xWithPadding(areaIndex * stepSize/divider+padding);
                         const endX = xWithPadding((areaIndex + 1) * stepSize/divider);
                         if (value === '1') {
-                            drawAreaLine(startX, y, endX, y);
+                            drawAreaLine(svg,startX, y, endX, y);
                         } else if(value === '0') {
-                            drawAreaLine(startX, y+signalHeight, endX, y+signalHeight);
+                            drawAreaLine(svg,startX, y+signalHeight, endX, y+signalHeight);
                         }
                         //Рисуем фронт/спад, если нужно
                         if (areaIndex > 0) {
                             const prevValue = areas[areaIndex - 1].value;
                             if (prevValue !== value) {
-                                drawAreaLine(startX, y, startX, y + signalHeight);
+                                drawAreaLine(svg,startX, y, startX, y + signalHeight);
                             }
                         }
                         //Дорисовываем хвостик от пред сигнала если надо
                         if(areaIndex > 0 && padding !== 0) {
                             const prevValue = areas[areaIndex - 1].value;
                             if(prevValue === '1') {
-                                drawAreaLine(startX-padding, y, startX, y);
+                                drawAreaLine(svg,startX-padding, y, startX, y);
                             } else {
-                                drawAreaLine(startX-padding, y+signalHeight, startX, y+signalHeight);
+                                drawAreaLine(svg,startX-padding, y+signalHeight, startX, y+signalHeight);
                             }
                         }
                     })
@@ -267,13 +266,13 @@ const DiagramRenderer = () => {
                         const startX = xWithPadding(currentStep * stepSize/divider + area.padding);
                         const endX = xWithPadding(currentStep*stepSize/divider + area.steps*stepSize/divider+ nextAreaPadding);
                         if (areaIndex > 0) {
-                            drawAreaLine(startX,y, startX + 8, y + signalHeight);
-                            drawAreaLine(startX,y+signalHeight, startX + 8, y);
-                            drawAreaLine(startX+8, y, endX, y);
-                            drawAreaLine(startX+8, y+signalHeight, endX, y+signalHeight);
+                            drawAreaLine(svg,startX,y, startX + 8, y + signalHeight);
+                            drawAreaLine(svg,startX,y+signalHeight, startX + 8, y);
+                            drawAreaLine(svg,startX+8, y, endX, y);
+                            drawAreaLine(svg,startX+8, y+signalHeight, endX, y+signalHeight);
                         } else {
-                            drawAreaLine(startX, y, endX, y);
-                            drawAreaLine(startX, y+signalHeight, endX, y+signalHeight);
+                            drawAreaLine(svg,startX, y, endX, y);
+                            drawAreaLine(svg,startX, y+signalHeight, endX, y+signalHeight);
                         }
                         const fillPath = createBusAreaPath(svg, areas, area, areaIndex, signalHeight, y, startX, endX);
                         if(color != null && color !== '#ffffff') {
