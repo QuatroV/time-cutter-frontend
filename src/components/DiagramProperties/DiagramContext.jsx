@@ -6,9 +6,8 @@ export const DiagramContext = createContext("");
 
 const defaultDiagram = {
     name: 'Название диаграммы',
-    totalTime: 60,
+    stepCount: 60,
     stepTime: 1,
-    unit: 'ue',
     showGrid: true,
     showAxes: true,
     signals: [],

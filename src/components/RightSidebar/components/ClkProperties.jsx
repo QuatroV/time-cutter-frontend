@@ -56,6 +56,7 @@ const ClkProperties = () => {
                    onKeyDown={handleKeyPress}
                    pattern="[01~/]+"/>
         </div>
+
     );
 }
 

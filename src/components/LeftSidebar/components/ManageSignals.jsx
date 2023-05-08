@@ -8,7 +8,8 @@ const ManageSignals = () => {
         addSignal({
             name: 'Сигнал ' + (diagram.signals.length + 1),
             type: 'bit',
-            areas : []
+            areas : [],
+            divider: 1
         })
     }
 

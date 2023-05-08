@@ -40,6 +40,13 @@ const SignalProperties = () => {
         }
     }
 
+    const handleDividerChange = (event) => {
+        setSignal((prevSignal) => ({...prevSignal, divider: event.target.value}));
+        updateSignal(currentItem.index, {
+            divider: event.target.value
+        });
+    }
+
 
     return (
         <div className={"space-y-4"}>
@@ -56,6 +63,17 @@ const SignalProperties = () => {
                         <option className={"text-center align-middle"} value="bit">одиночный</option>
                         <option className={"text-center align-middle"} value="bus">шина</option>
                     </select>
+                </div>
+                <label>Предделитель</label>
+                <div>
+                    <div className={"flex"}>
+                        <select className={"rounded-md border border-black text-center align-middle h-7 w-16 bg-white text-center"}
+                        value={signal.divider}
+                                onChange={handleDividerChange}>
+                            <option className={"text-center align-middle"} value={1}>1</option>
+                            <option className={"text-center align-middle"} value={2}>2</option>
+                        </select>
+                    </div>
                 </div>
             </div>
             {signal.type === 'bit' || signal.type === 'clk' ? <BitProperties/> : null}

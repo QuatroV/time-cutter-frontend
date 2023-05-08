@@ -126,17 +126,16 @@ const DiagramRenderer = () => {
         }
 
         //Свойства диаграммы
-        const { totalTime, stepTime, unit, showGrid, showAxes, signals, tracers } = diagram;
+        const { stepCount, stepTime, showGrid, showAxes, signals, tracers } = diagram;
 
         //Объявляем базовые настройки для отрисовки диаграмм
 
+        const stepSize = stepTime+7;
         const startPaddingX = findLongestSignalName(signals) * 7 + 20; //Откуда начинать рисовать диаграмму
         const startPaddingY = 20;
         const signalPadding = 15; //Расстояние между сигналами
-        const stepCount = totalTime/stepTime; //Количество шагов, отображаемых на диаграмме
-        const stepWidth = 50; //Размер одного шага
         const signalHeight = 25; //Высота сигнала
-        const diagramWidth = stepWidth*stepCount + startPaddingX; //Ширина холста = ширина шага*кол-во шагов + отступ диаграммы
+        const diagramWidth = stepSize * stepCount + startPaddingX + 2; //Ширина холста = ширина шага*кол-во шагов + отступ диаграммы
         const diagramHeight = signals.length * (signalHeight + signalPadding + 1) + startPaddingY; //Высота холста
 
         const xWithPadding = (x) => startPaddingX + x; //Координата x с учётом отступа
@@ -158,9 +157,9 @@ const DiagramRenderer = () => {
 
         //Отрисовка сетки
         if (showGrid) {
-            const stepCount = totalTime / stepTime;
+            const stepCount = diagram.stepCount;
             for (let i = 1; i <= stepCount; i++) {
-                const x = i * stepWidth + startPaddingX;
+                const x = i * stepSize + startPaddingX;
                 svg.line(x, 0, x, diagramHeight).stroke({ color: '#ccc', width: 1, dasharray: '5,5' });
             }
         }
@@ -174,7 +173,7 @@ const DiagramRenderer = () => {
             };
 
         signals.forEach((signal, index) => {
-            const { name, type, areas } = signal;
+            const { name, type, areas, divider } = signal;
             //Начальная координата по y = номер сигнала * размер сигнала + отступ
             const y = index * signalHeight+(signalPadding*(index+1)) + startPaddingY;
             switch (type) {
@@ -183,8 +182,8 @@ const DiagramRenderer = () => {
                     //Отрисовка битового сигнала
                     areas.forEach((area, areaIndex) => {
                         const {value, padding} = area;
-                        const startX = xWithPadding(areaIndex * stepWidth + padding);
-                        const endX = xWithPadding((areaIndex + 1) * stepWidth);
+                        const startX = xWithPadding(areaIndex * stepSize/divider + padding);
+                        const endX = xWithPadding((areaIndex + 1) * stepSize/divider);
                         if (areaIndex > 0 && areas[areaIndex-1].value !== value) {
                             const prevValue = areas[areaIndex - 1].value;
                             if(prevValue < value) {
@@ -219,8 +218,8 @@ const DiagramRenderer = () => {
                     //Отрисовка тактового сигнала
                     areas.forEach((area, areaIndex) => {
                         const {value, padding} = area;
-                        const startX = xWithPadding(areaIndex * stepWidth+padding);
-                        const endX = xWithPadding((areaIndex + 1) * stepWidth);
+                        const startX = xWithPadding(areaIndex * stepSize/divider+padding);
+                        const endX = xWithPadding((areaIndex + 1) * stepSize/divider);
                         if (value === '1') {
                             drawAreaLine(startX, y, endX, y);
                         } else if(value === '0') {
@@ -265,8 +264,8 @@ const DiagramRenderer = () => {
                         if(areas.length - 1 > areaIndex && areas[areaIndex+1].padding > 0) {
                             nextAreaPadding = areas[areaIndex+1].padding;
                         }
-                        const startX = xWithPadding(currentStep * stepWidth + area.padding);
-                        const endX = xWithPadding(currentStep*stepWidth + area.steps*stepWidth + nextAreaPadding);
+                        const startX = xWithPadding(currentStep * stepSize/divider + area.padding);
+                        const endX = xWithPadding(currentStep*stepSize/divider + area.steps*stepSize/divider+ nextAreaPadding);
                         if (areaIndex > 0) {
                             drawAreaLine(startX,y, startX + 8, y + signalHeight);
                             drawAreaLine(startX,y+signalHeight, startX + 8, y);
@@ -402,7 +401,7 @@ const DiagramRenderer = () => {
         }
 
         signals.forEach((signal, index) => {
-            const { type, areas } = signal;
+            const { type, areas, divider } = signal;
 
             let currentStep = 0;
 
@@ -425,15 +424,15 @@ const DiagramRenderer = () => {
                 let endX;
                 if(area != null) {
                     if(type === 'bus') {
-                        startX = xWithPadding(currentStep * stepWidth + area.padding);
-                        endX = xWithPadding(currentStep*stepWidth + area.steps*stepWidth + nextAreaPadding);
+                        startX = xWithPadding(currentStep * stepSize/divider + area.padding);
+                        endX = xWithPadding(currentStep*stepSize/divider + area.steps*stepSize/divider + nextAreaPadding);
                     } else {
-                        startX = xWithPadding(areaIndex * stepWidth + area.padding);
-                        endX = xWithPadding((areaIndex + 1) * stepWidth + nextAreaPadding);
+                        startX = xWithPadding(areaIndex * stepSize/divider + area.padding);
+                        endX = xWithPadding((areaIndex + 1) * stepSize/divider + nextAreaPadding);
                     }
                 } else {
-                    startX = xWithPadding(areaIndex * stepWidth);
-                    endX = xWithPadding((areaIndex + 1) * stepWidth);
+                    startX = xWithPadding(areaIndex * stepSize/divider);
+                    endX = xWithPadding((areaIndex + 1) * stepSize/divider);
                 }
 
                 //Отрисовка клеток для выделения
@@ -597,27 +596,6 @@ const DiagramRenderer = () => {
         });
 
     };
-
-    const exportPng = () => {
-
-    };
-
-    const exportSvg = () => {
-        console.log('here')
-        const svgString = containerRef.current.querySelector('svg');
-        const blob = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = diagram.name;
-        link.click();
-        URL.revokeObjectURL(url);
-    };
-
-    const exportJson = () => {
-
-    }
-
 
     return (
             <div ref={containerRef} style={{ width: '100%', height: '100%', overflow: 'auto', position: 'relative', padding: '10px' }}>

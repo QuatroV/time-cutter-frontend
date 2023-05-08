@@ -6,8 +6,7 @@ import Tracer from "./Tracer";
 const DiagramProperties = () => {
     const {diagram, updateDiagram} = useContext(DiagramContext);
     const [diagramName, setDiagramName] = useState(diagram.name);
-    const [totalTime, setTotalTime] = useState(diagram.totalTime);
-    const [unit, setUnit] = useState(diagram.unit);
+    const [stepCount, setStepCount] = useState(diagram.stepCount);
     const [stepTime, setStepTime] = useState(diagram.stepTime);
     const [showGrid, setShowGrid] = useState(diagram.showGrid);
     const [showAxes, setShowAxes] = useState(diagram.showAxes);
@@ -15,8 +14,7 @@ const DiagramProperties = () => {
 
     useEffect(() => {
         setDiagramName(diagram.name);
-        setTotalTime(diagram.totalTime);
-        setUnit(diagram.unit);
+        setStepCount(diagram.stepCount);
         setStepTime(diagram.stepTime);
         setShowGrid(diagram.showGrid);
         setShowAxes(diagram.showAxes);
@@ -43,19 +41,10 @@ const DiagramProperties = () => {
     }
 
     const handleTotalTimeChange = (event) => {
-        setTotalTime(event.target.value);
+        setStepCount(event.target.value);
         if (event.target.value) {
             updateDiagram({
-                totalTime: event.target.value
-            });
-        }
-    }
-
-    const handleUnitChange = (event) => {
-        setUnit(event.target.value);
-        if (event.target.value) {
-            updateDiagram({
-                unit: event.target.value
+                stepCount: event.target.value
             });
         }
     }
@@ -123,9 +112,9 @@ const DiagramProperties = () => {
                 <input value={diagramName} onChange={handleDiagramNameChange} onBlur={handleDiagramNameBlur} required className="rounded-md border border-black px-2 w-44 text-center"/>
             </div>
             <div className={"flex flex-col justify-center items-center gap-2"}>
-                <label>Общий интервал диаграммы</label>
+                <label>Количество шагов</label>
                 <div className={"flex space-x-5"}>
-                    <input value={totalTime}
+                    <input value={stepCount}
                            type={'number'}
                            maxLength="3"
                            min={1}
@@ -135,13 +124,6 @@ const DiagramProperties = () => {
                            required
                            onChange={handleTotalTimeChange}
                            className={"rounded-md border border-black px-2 w-20 text-center"}/>
-                    <select value={unit} className={"rounded-md border border-black text-center w-14 bg-white"}
-                            onChange={handleUnitChange}>
-                        <option value={"ue"}>у.е.</option>
-                        <option value="ms">мс</option>
-                        <option value="us">мкс</option>
-                        <option value="ns">нс</option>
-                    </select>
                 </div>
             </div>
             <div className={"flex space-x-5"}>
@@ -183,7 +165,6 @@ const DiagramProperties = () => {
                     )}
                 </div>
             </div>
-
         </div>
     );
 }
