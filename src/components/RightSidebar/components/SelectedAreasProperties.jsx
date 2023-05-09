@@ -11,10 +11,12 @@ const SelectedAreasProperties = () => {
     }
     const [genValue, setGenValue] = useState(currentItem.areas.length === 1? getArea(0).value : '');
     const [padding, setPadding] = useState(currentItem.areas.length === 1? getArea(0).padding : '');
+    const [isGapMark, setIsGapMark] = useState(currentItem.areas.length === 1? getArea(0).isGapMark : '');
 
     useEffect(() => {
         setGenValue(currentItem.areas.length === 1? getArea(0).value : '');
         setPadding(currentItem.areas.length === 1? getArea(0).padding : '');
+        setIsGapMark(currentItem.areas.length === 1? getArea(0).isGapMark : '');
     }, [currentItem, updateCurrentItem]);
 
     const handleValueChanged = (event) => {
@@ -67,6 +69,18 @@ const SelectedAreasProperties = () => {
         }
     }
 
+    const handleIsGapMarkChange = (event) => {
+        setIsGapMark(event.target.checked);
+        const indexes = currentItem.areas;
+        const tempAreas = diagram.signals[currentItem.index].areas;
+        for(let i = 0; i < indexes.length; i++) {
+            tempAreas[indexes[i]].isGapMark = event.target.checked;
+        }
+        updateSignal(currentItem.index, {
+            areas: tempAreas
+        })
+    }
+
 
 
     return (
@@ -95,6 +109,15 @@ const SelectedAreasProperties = () => {
                        onPaste={handlePaste}
                        value={padding}
                        className="rounded-md border border-black px-2 w-16 text-center"/>
+            </div>
+            <div className={"flex justify-center items-center gap-2"}>
+                <label>Gap-метка</label>
+                <input
+                    type={"checkbox"}
+                    className={"cursor-pointer"}
+                    checked={isGapMark}
+                    onChange={handleIsGapMarkChange}
+                />
             </div>
         </div>
     );

@@ -14,13 +14,15 @@ const SelectedBusAreasProperties = () => {
     const [steps, setSteps] = useState(currentItem.areas.length === 1? getArea(0).steps : '');
     const [color, setColor] = useState(currentItem.areas.length === 1? getArea(0).color : '');
     const [isHatchingNeed, setIsHatchingNeed] = useState(currentItem.areas.length === 1? getArea(0).isHatchingNeed : '');
+    const [isGapMark, setIsGapMark] = useState(currentItem.areas.length === 1? getArea(0).isGapMark : '');
 
     useEffect(() => {
         setGenValue(currentItem.areas.length === 1? getArea(0).value : '');
         setPadding(currentItem.areas.length === 1? getArea(0).padding : '');
         setSteps(currentItem.areas.length === 1? getArea(0).steps : '');
         setColor(currentItem.areas.length === 1? getArea(0).color : '');
-        setIsHatchingNeed(currentItem.areas.length === 1? getArea(0).isHatchingNeed : '')
+        setIsHatchingNeed(currentItem.areas.length === 1? getArea(0).isHatchingNeed : '');
+        setIsGapMark(currentItem.areas.length === 1? getArea(0).isGapMark : '');
 
     }, [currentItem, updateCurrentItem]);
 
@@ -110,6 +112,18 @@ const SelectedBusAreasProperties = () => {
         })
     }
 
+    const handleIsGapMarkChange = (event) => {
+        setIsGapMark(event.target.checked);
+        const indexes = currentItem.areas;
+        const tempAreas = diagram.signals[currentItem.index].areas;
+        for(let i = 0; i < indexes.length; i++) {
+            tempAreas[indexes[i]].isGapMark = event.target.checked;
+        }
+        updateSignal(currentItem.index, {
+            areas: tempAreas
+        })
+    }
+
 
 
     return (
@@ -167,7 +181,15 @@ const SelectedBusAreasProperties = () => {
                     />
                 </div>
             </div>
-
+            <div className={"flex justify-center items-center gap-2"}>
+                <label>Gap-метка</label>
+                <input
+                    type={"checkbox"}
+                    className={"cursor-pointer"}
+                    checked={isGapMark}
+                    onChange={handleIsGapMarkChange}
+                />
+            </div>
         </div>
     );
 }

@@ -4,7 +4,14 @@ import { ReactSVG } from 'react-svg';
 import {CurrentItemContext} from "../../DiagramProperties/CurrentItemContext";
 import diagramContext, {DiagramContext} from "../../DiagramProperties/DiagramContext";
 import {SvgContext} from "./SvgContext";
-import {addTextToBusArea, createBitAreaPath, createBusAreaPath, drawAreaLine, drawBitArea} from "./DrawUtils";
+import {
+    addTextToBusArea,
+    createBitAreaPath,
+    createBitAreaPathNew,
+    createBusAreaPath,
+    drawAreaLine,
+    drawBitArea, drawGapMark
+} from "./DrawUtils";
 
 
 const DiagramRenderer = () => {
@@ -135,7 +142,7 @@ const DiagramRenderer = () => {
         const startPaddingY = 20;
         const signalPadding = 15; //Расстояние между сигналами
         const signalHeight = 25; //Высота сигнала
-        const diagramWidth = stepSize * stepCount + startPaddingX + 2; //Ширина холста = ширина шага*кол-во шагов + отступ диаграммы
+        const diagramWidth = stepSize * stepCount + startPaddingX + 17; //Ширина холста = ширина шага*кол-во шагов + отступ диаграммы
         const diagramHeight = signals.length * (signalHeight + signalPadding + 1) + startPaddingY; //Высота холста
 
         const xWithPadding = (x) => startPaddingX + x; //Координата x с учётом отступа
@@ -167,9 +174,6 @@ const DiagramRenderer = () => {
         /**
          * Отрисовка сигналов
          */
-            //Отрисовка сигнальной линии
-
-
         signals.forEach((signal, index) => {
             const { name, type, areas, divider } = signal;
             //Начальная координата по y = номер сигнала * размер сигнала + отступ
@@ -179,36 +183,22 @@ const DiagramRenderer = () => {
                 {
                     //Отрисовка битового сигнала
                     areas.forEach((area, areaIndex) => {
-                        const {value, padding} = area;
+                        if(areaIndex/divider >= stepCount) {
+                            return;
+                        }
+                        const {value, padding, isGapMark} = area;
                         const startX = xWithPadding(areaIndex * stepSize/divider + padding);
                         const endX = xWithPadding((areaIndex + 1) * stepSize/divider);
                         drawBitArea(svg, areas,area,areaIndex,signalHeight,y,startX,endX);
-                        // if (areaIndex > 0 && areas[areaIndex-1].value !== value) {
-                        //     const prevValue = areas[areaIndex - 1].value;
-                        //     if(prevValue < value) {
-                        //         drawAreaLine(svg,startX, y+signalHeight, startX+8, y);
-                        //         drawAreaLine(svg,startX+8, y, endX, y);
-                        //     } else {
-                        //         drawAreaLine(svg,startX, y, startX+8, y+signalHeight);
-                        //         drawAreaLine(svg,startX+8, y+signalHeight, endX, y+signalHeight);
-                        //     }
-                        //
-                        // } else {
-                        //     if (value === '1') {
-                        //         drawAreaLine(svg,startX, y, endX, y);
-                        //     } else if(value === '0') {
-                        //         drawAreaLine(svg,startX, y + signalHeight, endX, y + signalHeight)
-                        //     }
-                        // }
-                        // //Дорисовываем хвостик от пред сигнала если надо
-                        // if(areaIndex > 0 && padding !== 0) {
-                        //     const prevValue = areas[areaIndex - 1].value;
-                        //     if(prevValue === '1') {
-                        //         drawAreaLine(svg,startX-padding, y, startX, y);
-                        //     } else {
-                        //         drawAreaLine(svg,startX-padding, y+signalHeight, startX, y+signalHeight);
-                        //     }
-                        // }
+                        if(isGapMark) {
+                            if(value === '1') {
+                                drawGapMark(svg, (startX + endX)/2, y);
+                            } else if(value === '0') {
+                                drawGapMark(svg, (startX + endX)/2, y+signalHeight);
+                            } else {
+                                drawGapMark(svg, (startX + endX)/2, y+signalHeight/2);
+                            }
+                        }
                     })
                     break;
                 }
@@ -216,7 +206,10 @@ const DiagramRenderer = () => {
                 {
                     //Отрисовка тактового сигнала
                     areas.forEach((area, areaIndex) => {
-                        const {value, padding} = area;
+                        if(areaIndex/divider >= stepCount) {
+                            return;
+                        }
+                        const {value, padding, isGapMark} = area;
                         const startX = xWithPadding(areaIndex * stepSize/divider+padding);
                         const endX = xWithPadding((areaIndex + 1) * stepSize/divider);
                         if (value === '1') {
@@ -240,6 +233,15 @@ const DiagramRenderer = () => {
                                 drawAreaLine(svg,startX-padding, y+signalHeight, startX, y+signalHeight);
                             }
                         }
+                        if(isGapMark) {
+                            if(value === '1') {
+                                drawGapMark(svg, (startX + endX)/2, y);
+                            } else if(value === '0') {
+                                drawGapMark(svg, (startX + endX)/2, y+signalHeight);
+                            } else {
+                                drawGapMark(svg, (startX + endX)/2, y+signalHeight/2);
+                            }
+                        }
                     })
                     break;
                 }
@@ -257,7 +259,10 @@ const DiagramRenderer = () => {
 
                     let currentStep = 0;
                     areas.forEach((area, areaIndex) => {
-                        const {value, steps, padding, color, isHatchingNeed} = area;
+                        const {value, steps, padding, color, isHatchingNeed, isGapMark} = area;
+                        if(currentStep/divider >= stepCount) {
+                            return;
+                        }
                         //Добавляем в конец, если в след элементе есть задержка
                         let nextAreaPadding = 0;
                         if(areas.length - 1 > areaIndex && areas[areaIndex+1].padding > 0) {
@@ -286,6 +291,9 @@ const DiagramRenderer = () => {
                         //Добавляем текст
                         addTextToBusArea(svg, area,fillPath)
                         currentStep+=Number(area.steps);
+                        if(isGapMark) {
+                            drawGapMark(svg, (startX + endX)/2, y);
+                        }
                     })
                     break;
                 }
@@ -294,12 +302,12 @@ const DiagramRenderer = () => {
             // Добавить название сигнала слева от сигнала
             const signalNameText = svg
                 .text(name)
-                .font({ family: 'Arial', size: 16, anchor: 'start', weight: "bold"})
+                .font({ family: 'Arial', size: 12, anchor: 'start', weight: "bold"})
                 .fill("green")
                 .move(startPaddingX-3, y+signalHeight/2-14)
                 .attr({ 'text-anchor': 'end', 'dominant-baseline': 'central', 'cursor': 'pointer' });
             const underline = svg
-                .line(startPaddingX-3, y+signalHeight/2+9, startPaddingX - name.length*10, y+signalHeight/2+9)
+                .line(startPaddingX-3, y+signalHeight/2+5, startPaddingX - name.length*7, y+signalHeight/2+5)
                 .stroke({ width: 2, dasharray: "2,2", color: "black" });
             underline.hide();
 
@@ -415,6 +423,9 @@ const DiagramRenderer = () => {
             }
 
             tempAreas.forEach((area, areaIndex) => {
+                if(areaIndex/divider >= stepCount) {
+                    return;
+                }
                 let nextAreaPadding = 0;
                 if(areas.length - 1 > areaIndex && areas[areaIndex+1].padding > 0) {
                     nextAreaPadding = areas[areaIndex+1].padding;
@@ -441,7 +452,7 @@ const DiagramRenderer = () => {
                         areaPath = createBusAreaPath(svg, areas, area, areaIndex, signalHeight, y, startX, endX)
                             .fill('transparent');
                     } else if(type === 'bit') {
-                        areaPath = createBitAreaPath(svg, areas, area, areaIndex, signalHeight, y, startX, endX)
+                        areaPath = createBitAreaPathNew(svg, areas, area, areaIndex, signalHeight, y, startX, endX)
                             .fill('transparent');
                     } else {
                         areaPath = svg.rect(endX - startX, signalHeight).fill('transparent').move(startX, y);

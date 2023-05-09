@@ -4,6 +4,7 @@ import {DiagramContext} from "../../DiagramProperties/DiagramContext";
 import {SvgContext} from "../../Graph/components/SvgContext";
 import axios from "axios";
 import FileSelect from "./FileSelect";
+import {LoginContext} from "./LoginContext";
 
 const FileItem = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -13,6 +14,7 @@ const FileItem = () => {
     const [isCreateModal, setIsCreateModal] = useState(false);
     const [isFileSelect, setIsFileSelect] = useState(false);
     const {diagram, createDefaultDiagram, updateDiagramFull} = useContext(DiagramContext);
+    const {login} = useContext(LoginContext);
     const {svg} = useContext(SvgContext);
 
     const handleButtonClick = () => {
@@ -174,8 +176,8 @@ const FileItem = () => {
             <div className="absolute top-8 left-0 inline-block bg-gray-100 p-1 rounded-lg">
                 <ul className="flex flex-col gap-1">
                     <li onClick={handleCreateClick} className="hover:bg-gray-200 py-1 px-4 rounded-b-lg border">Создать</li>
-                    <li onClick={handleOpenFromServerClick} className="hover:bg-gray-200 py-1 px-4 border">Открыть</li>
-                    <li onClick={handleSaveOnServerClick} className="hover:bg-gray-200 py-1 px-4 border">Сохранить</li>
+                    {login !=null && login !== '' && <li onClick={handleOpenFromServerClick} className="hover:bg-gray-200 py-1 px-4 border">Открыть</li>}
+                    {login !=null && login !== '' && <li onClick={handleSaveOnServerClick} className="hover:bg-gray-200 py-1 px-4 border">Сохранить</li>}
                     <li onClick={handleExportClick} className="hover:bg-gray-200 py-1 px-4 border">Экспорт</li>
                     <li onClick={handleImportClick} className="hover:bg-gray-200 py-1 px-4 rounded-b-lg border">Импорт</li>
                 </ul>

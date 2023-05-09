@@ -9,7 +9,8 @@ const ManageSignals = () => {
             name: 'Сигнал ' + (diagram.signals.length + 1),
             type: 'bit',
             areas : [],
-            divider: 1
+            divider: 1,
+            isGapMark: false
         })
     }
 

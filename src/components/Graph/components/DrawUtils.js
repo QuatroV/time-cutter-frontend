@@ -125,8 +125,8 @@ export function createBitAreaPath(svg, areas, area, areaIndex, signalHeight, y, 
  * @returns {*}
  */
 export function createBitAreaPathNew(svg, areas, area, areaIndex, signalHeight, y, startX, endX) {
-    let nextArea;
-    let prevArea;
+    let nextArea = null;
+    let prevArea = null;
     let pathPattern=``;
     if(areas.length - 1 > areaIndex) {
         nextArea = areas[areaIndex+1];
@@ -177,7 +177,7 @@ export function createBitAreaPathNew(svg, areas, area, areaIndex, signalHeight, 
                 pathPattern+= `M ${startX} ${y} L ${startX+8} ${y+signalHeight/2} H ${endX}`
             }
 
-            if(prevValue === 0) {
+            if(prevValue == 0) {
                 pathPattern+= `M ${startX} ${y+signalHeight} L ${startX+8} ${y+signalHeight/2} H ${endX}`
             }
         } else {
@@ -192,26 +192,64 @@ export function createBitAreaPathNew(svg, areas, area, areaIndex, signalHeight, 
         if(nextArea !== null && nextArea.value !== area.value) {
             const nextValue = nextArea.value;
             if(nextValue == 1) {
-                pathPattern+= `M ${startX} ${y} L ${startX+8} ${y+signalHeight} H ${endX}`
+                pathPattern+=` L ${endX+8} ${y} H ${startX}`
             }
 
             if(nextValue === 'z') {
-                pathPattern+= `M ${startX} ${y+signalHeight/2} L ${startX+8} ${y+signalHeight} H ${endX}`
+                pathPattern+= `L ${endX+8} ${y+signalHeight/2} V ${y} H ${startX}`
             }
 
         } else {
-            pathPattern+= `M ${startX} ${y+signalHeight} H ${endX}`
+            pathPattern+= ` V ${y} H ${startX}`
         }
     }
 
     if(area.value == 1) {
+        if(nextArea !== null && nextArea.value !== area.value) {
+            const nextValue = nextArea.value;
+            if(nextValue == 0) {
+                pathPattern+=` L ${endX+8} ${y+signalHeight} H ${startX}`
+            }
 
+            if(nextValue === 'z') {
+                pathPattern+= `L ${endX+8} ${y+signalHeight/2} V ${y+signalHeight} H ${startX}`
+            }
+
+        } else {
+            pathPattern+= ` V ${y+signalHeight} H ${startX}`
+        }
     }
 
     if(area.value == 'z') {
+        if(nextArea !== null && nextArea.value !== area.value) {
+            const nextValue = nextArea.value;
+            if(nextValue == 0) {
+                pathPattern+=` L ${endX+8} ${y+signalHeight} H ${startX}`
+            }
 
+            if(nextValue == 1) {
+                pathPattern+= ` L ${endX+8} ${y} V ${y+signalHeight} H ${startX}`
+            }
+
+        } else {
+            pathPattern+= ` V ${y+signalHeight} H ${startX}`
+        }
     }
 
+    /**
+     * Замыкание
+     */
+    //Замыкание
+    if(areaIndex === 0 || prevArea.value === area.value) {
+        if(area.value == 1) {
+            pathPattern+= ` V ${y}`;
+        } else if(area.value == 0){
+            pathPattern += ` V ${y+signalHeight}`;
+        } else if(area.value === 'z'&& prevArea.value) {
+            pathPattern += ` V ${y+signalHeight/2}`;
+        }
+    }
+    pathPattern += ` Z`;
 
     return svg.path(pathPattern);
 }
@@ -277,6 +315,31 @@ export function drawBitArea(svg, areas, area, areaIndex, signalHeight, y, startX
     }
 }
 
+/**
+ * Отрисовать линию сигнала
+ * @param svg
+ * @param x1
+ * @param y1
+ * @param x2
+ * @param y2
+ */
 export const drawAreaLine = (svg, x1,y1, x2,y2) => {
     svg.line(x1, y1, x2, y2).stroke({ color: 'blue', width: 2, linecap: 'round' });
 };
+
+export function drawGapMark(svg, x, y) {
+    const waveWidth = 5;
+    const waveHeight = 14;
+    const sDistance = 3;
+    x-=waveWidth/2;
+
+    let wavePath = `M ${x} ${y+waveHeight/2} C ${x + waveWidth/2} ${y+waveHeight/2} ${x + waveWidth/2} ${y - waveHeight/2} ${x+waveWidth},${y - waveHeight/2}`;
+    svg.path(wavePath)
+        .fill('none')
+        .stroke({ width: 1, color: 'black' });
+    x+=sDistance
+    wavePath =  `M ${x} ${y+waveHeight/2} C ${x + waveWidth/2} ${y+waveHeight/2} ${x + waveWidth/2} ${y - waveHeight/2} ${x+waveWidth},${y - waveHeight/2}`;
+    svg.path(wavePath)
+        .fill('none')
+        .stroke({ width: 1, color: 'black' });
+}
