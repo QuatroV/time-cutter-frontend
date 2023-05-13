@@ -307,7 +307,7 @@ export function drawBitArea(svg, areas, area, areaIndex, signalHeight, y, startX
     if(area.padding !== 0 && prevValue != null) {
         if(prevValue == 1) {
             drawAreaLine(svg,startX-area.padding, y, startX, y);
-        } else if(prevArea == 0) {
+        } else if(prevValue == 0) {
             drawAreaLine(svg,startX-area.padding, y+signalHeight, startX, y+signalHeight);
         } else if(prevArea === 'z') {
             drawAreaLine(svg,startX-area.padding, y+signalHeight/2, startX, y+signalHeight/2);

@@ -95,7 +95,7 @@ const SelectedAreasProperties = () => {
                     <option value="" selected></option>
                     <option className={"text-center align-middle"} value='1'>1</option>
                     <option className={"text-center align-middle"} value='0'>0</option>
-                    <option className={"text-center align-middle"} value='z'>z</option>
+                    {diagram.signals[currentItem.index].type === 'bit' &&  <option className={"text-center align-middle"} value='z'>z</option> }
                 </select>
             </div>
             <div className={"flex flex-col justify-center items-center gap-2"}>
