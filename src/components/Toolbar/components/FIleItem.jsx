@@ -16,6 +16,7 @@ const FileItem = () => {
     const {diagram, createDefaultDiagram, updateDiagramFull} = useContext(DiagramContext);
     const {login} = useContext(LoginContext);
     const {svg} = useContext(SvgContext);
+    const api = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
 
     const handleButtonClick = () => {
         setIsOpen(!isOpen);
@@ -151,7 +152,7 @@ const FileItem = () => {
         formData.append('login',login)
         formData.append('diagramName', diagram.name);
 
-        axios.post("http://localhost:8080/api/storage/save", formData, {
+        axios.post(`${api}/api/storage/save`, formData, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'multipart/form-data'

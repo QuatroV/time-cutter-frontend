@@ -245,7 +245,7 @@ export function createBitAreaPathNew(svg, areas, area, areaIndex, signalHeight, 
             pathPattern+= ` V ${y}`;
         } else if(area.value == 0){
             pathPattern += ` V ${y+signalHeight}`;
-        } else if(area.value === 'z'&& prevArea.value) {
+        } else if(area.value === 'z') {
             pathPattern += ` V ${y+signalHeight/2}`;
         }
     }
@@ -309,7 +309,7 @@ export function drawBitArea(svg, areas, area, areaIndex, signalHeight, y, startX
             drawAreaLine(svg,startX-area.padding, y, startX, y);
         } else if(prevValue == 0) {
             drawAreaLine(svg,startX-area.padding, y+signalHeight, startX, y+signalHeight);
-        } else if(prevArea === 'z') {
+        } else if(prevValue === 'z') {
             drawAreaLine(svg,startX-area.padding, y+signalHeight/2, startX, y+signalHeight/2);
         }
     }

@@ -5,12 +5,13 @@ import {DiagramContext} from "../../DiagramProperties/DiagramContext";
 const FileSelect = ({handleClose}) => {
     const [files, setFiles] = useState([]);
     const {updateDiagramFull} = useContext(DiagramContext);
+    const api = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
 
     useEffect(() => {
         const login = sessionStorage.getItem("login");
         const token = JSON.parse(sessionStorage.getItem("tokens")).accessToken;
 
-        axios.post("http://localhost:8080/api/storage/getList", {
+        axios.post(`${api}/api/storage/getList`, {
             login: login
         }, {
             headers: {
@@ -28,7 +29,7 @@ const FileSelect = ({handleClose}) => {
     function setDiagram(diagramName) {
         const login = sessionStorage.getItem("login");
         const token = JSON.parse(sessionStorage.getItem("tokens")).accessToken;
-        axios.post("http://localhost:8080/api/storage/getDiagram", {
+        axios.post(`${api}/api/storage/getDiagram`, {
             login: login,
             diagramName: diagramName
         }, {

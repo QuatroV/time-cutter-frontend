@@ -6,8 +6,9 @@ const LoginForm = (props) => {
     const [loginForm, setLoginForm] = useState('');
     const [passwordForm, setPasswordForm] = useState('');
     const [error, setError] = useState(null);
-    
     const {updateLogin} = useContext(LoginContext);
+
+    const api = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
 
     const handleLoginChange = (event) => {
         setLoginForm(event.target.value);
@@ -20,7 +21,7 @@ const LoginForm = (props) => {
 
     const handleFormSubmit = (event) => {
         event.preventDefault();
-        axios.post("http://localhost:8080/api/auth/login", {
+        axios.post(`${api}/api/auth/login`, {
             'login': loginForm,
             'password': passwordForm
         }).then((resp) => {
