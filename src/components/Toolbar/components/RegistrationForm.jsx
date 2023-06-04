@@ -6,6 +6,7 @@ const RegistrationForm = (props) => {
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
     const [error, setError] = useState(null);
+    const api = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
 
     const handleLoginChange = (event) => {
         setLogin(event.target.value);
@@ -22,7 +23,7 @@ const RegistrationForm = (props) => {
     const handleFormSubmit = (event) => {
         event.preventDefault();
         event.preventDefault();
-        axios.post("http://localhost:8080/api/auth/register", {
+        axios.post(`${api}/api/auth/register`, {
             'login': login,
             'email':email,
             'password': password,

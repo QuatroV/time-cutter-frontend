@@ -5,13 +5,13 @@ import debounce from 'lodash/debounce';
 export const DiagramContext = createContext("");
 
 const defaultDiagram = {
-    name: 'Кефтеме',
-    totalTime: 60,
+    name: 'Название диаграммы',
+    stepCount: 60,
     stepTime: 1,
-    unit: 'ue',
     showGrid: true,
     showAxes: true,
-    signals: []
+    signals: [],
+    tracers: []
 };
 
 // Создаем провайдер контекста
@@ -43,6 +43,14 @@ const DiagramContextProvider = ({ children }) => {
             ...prevDiagram,
             ...updatedProperties
         }));
+    }
+
+    const updateDiagramFull = (newDiagram) => {
+        if(newDiagram.tracers != null && newDiagram.signals != null) {
+            setDiagram(newDiagram);
+        } else {
+            alert("Ошибка импорта!");
+        }
     }
 
     /**
@@ -78,6 +86,10 @@ const DiagramContextProvider = ({ children }) => {
         });
     };
 
+    const createDefaultDiagram = () => {
+        setDiagram(defaultDiagram);
+    }
+
     /**
      * Функция для обновления диаграммы в локальном хранилище
      * Используется для задержки, чтоб сохранялось актуальное значение
@@ -99,7 +111,9 @@ const DiagramContextProvider = ({ children }) => {
         updateDiagram,
         addSignal,
         removeSignal,
-        updateSignal
+        updateSignal,
+        createDefaultDiagram,
+        updateDiagramFull
     };
 
     // Предоставляем доступ к функции setState() и значению контекста через провайдер

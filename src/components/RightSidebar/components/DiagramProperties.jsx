@@ -1,14 +1,32 @@
-import React, {useContext, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {DiagramContext} from "../../DiagramProperties/DiagramContext";
+import BusArea from "./BusArea";
+import Tracer from "./Tracer";
 
 const DiagramProperties = () => {
     const {diagram, updateDiagram} = useContext(DiagramContext);
     const [diagramName, setDiagramName] = useState(diagram.name);
-    const [totalTime, setTotalTime] = useState(diagram.totalTime);
-    const [unit, setUnit] = useState(diagram.unit);
+    const [stepCount, setStepCount] = useState(diagram.stepCount);
     const [stepTime, setStepTime] = useState(diagram.stepTime);
     const [showGrid, setShowGrid] = useState(diagram.showGrid);
     const [showAxes, setShowAxes] = useState(diagram.showAxes);
+    const [tracers, setTracers] = useState(diagram.tracers);
+
+    useEffect(() => {
+        setDiagramName(diagram.name);
+        setStepCount(diagram.stepCount);
+        setStepTime(diagram.stepTime);
+        setShowGrid(diagram.showGrid);
+        setShowAxes(diagram.showAxes);
+        setTracers(diagram.tracers);
+    }, [diagram]);
+
+
+
+
+    const defaultTracer = {
+        x: 5
+    }
 
     const handleDiagramNameChange = (event) => {
         setDiagramName(event.target.value);
@@ -23,19 +41,10 @@ const DiagramProperties = () => {
     }
 
     const handleTotalTimeChange = (event) => {
-        setTotalTime(event.target.value);
+        setStepCount(event.target.value);
         if (event.target.value) {
             updateDiagram({
-                totalTime: event.target.value
-            });
-        }
-    }
-
-    const handleUnitChange = (event) => {
-        setUnit(event.target.value);
-        if (event.target.value) {
-            updateDiagram({
-                unit: event.target.value
+                stepCount: event.target.value
             });
         }
     }
@@ -86,6 +95,14 @@ const DiagramProperties = () => {
         }
     }
 
+    function handleAddTracer(event) {
+        const newTracers = [...diagram.tracers, defaultTracer];
+        setTracers(newTracers);
+        updateDiagram({
+            tracers: newTracers
+        })
+    }
+
 
 
     return (
@@ -95,9 +112,9 @@ const DiagramProperties = () => {
                 <input value={diagramName} onChange={handleDiagramNameChange} onBlur={handleDiagramNameBlur} required className="rounded-md border border-black px-2 w-44 text-center"/>
             </div>
             <div className={"flex flex-col justify-center items-center gap-2"}>
-                <label>Общий интервал диаграммы</label>
+                <label>Количество шагов</label>
                 <div className={"flex space-x-5"}>
-                    <input value={totalTime}
+                    <input value={stepCount}
                            type={'number'}
                            maxLength="3"
                            min={1}
@@ -107,13 +124,6 @@ const DiagramProperties = () => {
                            required
                            onChange={handleTotalTimeChange}
                            className={"rounded-md border border-black px-2 w-20 text-center"}/>
-                    <select value={unit} className={"rounded-md border border-black text-center w-14 bg-white"}
-                            onChange={handleUnitChange}>
-                        <option value={"ue"}>у.е.</option>
-                        <option value="ms">мс</option>
-                        <option value="us">мкс</option>
-                        <option value="ns">нс</option>
-                    </select>
                 </div>
             </div>
             <div className={"flex space-x-5"}>
@@ -133,20 +143,28 @@ const DiagramProperties = () => {
             <div className={"flex flex-col justify-center gap-2 pl-5"}>
                 <div className={"flex space-x-5"}>
                     <input type={"checkbox"}
-                           value={showGrid}
+                           checked={showGrid}
                            onChange={handleShowGrid}
                     />
                     <label>Отображение сетки</label>
                 </div>
                 <div className={"flex space-x-5"}>
                     <input type={"checkbox"}
-                           value={showAxes}
+                           checked={showAxes}
                            onChange={handleShowAxes}
                     />
                     <label>Отображение осей</label>
                 </div>
             </div>
-
+            <div className={"flex flex-col justify-center items-center gap-2 border-t border-black pb-5 w-full"}>
+                <label className={""}>Трасеры</label>
+                <button className={"rounded-md border border-black mt-2 w-full"} onClick={handleAddTracer}>Добавить</button>
+                <div className="flex flex-col overflow-auto w-full">
+                    {diagram.tracers.map((item, index) =>
+                        <Tracer classname={"w-full"} tracer={item} index={index}/>
+                    )}
+                </div>
+            </div>
         </div>
     );
 }

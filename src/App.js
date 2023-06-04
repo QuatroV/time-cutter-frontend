@@ -9,6 +9,8 @@ import Toolbar from "./components/Toolbar"
 import "./index.css"
 import LoginContextProvider from "./components/Toolbar/components/LoginContext";
 import DiagramContextProvider from "./components/DiagramProperties/DiagramContext";
+import CurrentItemContextProvider from "./components/DiagramProperties/CurrentItemContext";
+import SvgContextProvider from "./components/Graph/components/SvgContext";
 
 function App() {
     const [userData,setUserData]= useState({
@@ -36,18 +38,22 @@ function App() {
   return (
       <LoginContextProvider>
           <DiagramContextProvider>
-            <div className="App bg-gray-200 w-screen h-screen flex flex-col">
-              <div className="w-100 flex flex-col border-b border-gray-600">
-                <Menubar user={userData}/>
-                <Toolbar user={userData}/>
-              </div>
-              <div className="w-100 flex flex-1 h-3/5">
-                <LeftSidebar />
-                <Graph />
-                <RightSidebar />
-              </div>
-            <Footer />
-            </div>
+              <CurrentItemContextProvider>
+                  <SvgContextProvider>
+                      <div className="App bg-gray-200 w-screen h-screen flex flex-col">
+                          <div className="w-100 flex flex-col border-b border-gray-600 z-20">
+                              <Menubar user={userData}/>
+                              <Toolbar user={userData}/>
+                          </div>
+                          <div className="flex flex-1 h-3/5 min-w-full overflow-auto">
+                              <LeftSidebar />
+                              <Graph />
+                              <RightSidebar />
+                          </div>
+                          <Footer />
+                      </div>
+                  </SvgContextProvider>
+              </CurrentItemContextProvider>
           </DiagramContextProvider>
       </LoginContextProvider>
   );
